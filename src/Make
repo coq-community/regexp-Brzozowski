@@ -1,0 +1,14 @@
+
+
+-R /home/vinz/boulot/coq/ssreflect-svn/trunk/ssreflect/ssreflect1.3_v8.3/src Ssreflect
+-R /home/vinz/boulot/coq/ssreflect-svn/trunk/ssreflect/ssreflect1.3_v8.3/theories Ssreflect
+
+glue.v
+regexp.v
+gfinset.v
+finite_der.v
+sim1.v
+sim2.v
+equiv.v
+ex.v
+

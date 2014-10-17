@@ -1,0 +1,39 @@
+Developped and tested with Coq v8.3/ Ssreflect v1.3
+
+overview of the files:
+* glue.v : 
+  basic toolset of definitions and lemmas
+* regexp.v : 
+  description and properties of regular expressions
+* gfinset.v : 
+  our alternative definition of finite sets
+* finite_der.v : 
+  the main proof that the set of derivatives
+  of a regular expression is finite.
+  the proof use an abstract notion of similarity with
+  the Brzozowsky requierements.
+* equiv.v : 
+  description of the equivalence procedure
+  and proof of its correctness.
+  In case of non equivalence, we also produce a witness which is
+  recognized by a language and not by the other.
+* sim1.v :
+  naive implementation of a similarity (by double inclusion), with
+  only brozozowsky simplifications.
+* sim2.v:
+  more effiecient implementation of a similarity (with a "compilation"
+  of regular expressions) which implements much more simplifications.
+* ex.v :
+  a few test cases for the decision procedure, actually computing in 
+  Coq, which allows to compare sim1 and sim2.
+        
+how to compile:
+- If you have ssr as a plugin, please modify the Make file to point out to your
+/path/to/ssr/src and /path/to/ssr/theories.
+- If you have ssrcoq as a binary, please modify the Make file so it can
+found it.
+
+In the end, run make.
+
+
+

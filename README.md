@@ -16,4 +16,6 @@ http://wiki.portal.chalmers.se/cse/pmwiki.php/ForMath
 http://wiki.portal.chalmers.se/cse/pmwiki.php/ForMath/PapersAndSlides
 
 
-
+I do not maintain this code anymore. It was developped and tested using
+Coq v8.3 / Ssreflect v1.3. Please have a look at the src/README and src/Make
+file before executing `make`.
