@@ -9,6 +9,8 @@ The paper has been accepted at the CPP'11 conference (http://formes.asia/cpp/)
 Here is a link springer's site:
 	http://link.springer.com/chapter/10.1007%2F978-3-642-25379-9_11
 
+A link to a late draft of the paper here: http://www.diku.dk/hjemmesider/ansatte/henglein/papers/coquand2011.pdf (The final paper was published to Springer.)
+
 We wrote this paper during my postdoc at Chalmers, in the Formath Project.
 More information about the project or its achievement is available on 
 Chalmers website:
