@@ -86,9 +86,26 @@ build: |-
 documentation: |-
   ## Documentation
 
-  This paper was written at Chalmers, in the ForMath Project.
-  More information about the project and its achievement is available
-  on the Chalmers website:
+  The [paper](https://link.springer.com/chapter/10.1007%2F978-3-642-25379-9_11) on the
+  formalization was written at Chalmers, in the ForMath Project. More information about
+  the project and its achievements is available on the Chalmers website:
   - http://wiki.portal.chalmers.se/cse/pmwiki.php/ForMath
   - http://wiki.portal.chalmers.se/cse/pmwiki.php/ForMath/PapersAndSlides
+
+  Overview of the Coq files:
+  - `glue.v`: Basic definitions and lemmas.
+  - `regexp.v`: Description and properties of regular expressions.
+  - `gfinset.v`: Alternative definition of finite sets.
+  - `finite_der.v`: The main proof that the set of derivatives of a regular
+    expression is finite. The proof uses an abstract notion of similarity
+    with the Brzozowski requirements.
+  - `equiv.v`: Description of the equivalence procedure and proof of its correctness.
+    In case of non-equivalence, we also produce a witness which is recognized by the
+    first language but not by the second.
+  - `sim1.v`: Naive implementation of similarity checking (by double inclusion), with
+    only Brzozowski simplifications.
+  - `sim2.v`: More efficient implementation of similarity checking (with a "compilation"
+    of regular expressions) which implements many more simplifications.
+  - `ex.v`: A few test cases which allow comparing the decision procedures in `sim1.v`
+    and `sim2.v` inside Coq.
 ---
