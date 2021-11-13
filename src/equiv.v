@@ -1,7 +1,7 @@
 (* begin hide *)
-Require Import RelationClasses.
-Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
-Require Import bigop path.
+From Coq Require Import RelationClasses.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
+From mathcomp Require Import bigop path.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
@@ -76,9 +76,9 @@ Lemma EQUIV3 : forall E F, E ≡ F <->
   (forall e f, set_pair_der E F (e,f) -> has_eps e = has_eps f).
 Proof.
 rewrite /EQUIV => E F; split => h.
-- rewrite /set_pair_der. move => e f [s []] h1 h2.
+- rewrite /set_pair_der. move => e f [s] h1 h2.
   rewrite (has_eps_sim h1) (has_eps_sim h2) -!mem_wder !mem_derE. 
-  by apply: h. 
+  by apply: h.
 - rewrite /set_pair_der in h => s. apply EQUIV2. move => t.
   rewrite (h (wder t E) (wder t F)) => //.
   exists t; reflexivity.
@@ -100,7 +100,7 @@ Qed.
 
 Definition sim3 := eq_prod (eq_prod sim sim) wsim.
 
-Global Instance sim3_Eq : Equivalence sim3.
+Global Program Instance sim3_Eq : Equivalence sim3.
 
 Lemma sim_dec3 : forall x y, {sim3 x y}+{~sim3 x y}.
 Proof.
@@ -154,17 +154,16 @@ apply Bar_gset_prod. apply Bar_gset_prod.
 by apply finite_number_of_der. 
 by apply finite_number_of_der.
 apply cBar => x _. apply cBar => y. case => _. by rewrite /nwsim.
-case => [[e f] s]. rewrite /set_pair_der => [[[u [h1 h2]]] _]. 
+case => [[e f] s]. rewrite /set_pair_der /= => [[[u sime simf] _]].
 split => //. split. by exists u. by exists u.
 Qed.
-
 
 Lemma Set_of_der_compat: forall E F, 
  E_compat sim3 (Prod (set_pair_der E F) bT).
 Proof.
 rewrite /E_compat /set_pair_der => E F [[e f] s] [[e' f'] s'] [[] ]. 
-rewrite /sim => h1 h2 _ [[u [h3 h4]] _].
-split => //. exists u. 
+rewrite /sim => h1 h2 _ [[u h3 h4] _].
+split => //. exists u.
 - transitivity e => //; by symmetry. 
 transitivity f => //; by symmetry. 
 Qed.
@@ -219,9 +218,7 @@ move => _ hin. by apply: hi.
 Qed.
 
 
-Global Instance sim2_Eq : Equivalence (eq_prod sim sim).
-
-
+Global Program Instance sim2_Eq : Equivalence (eq_prod sim sim).
 
 Lemma In_DER1 : forall f f' v Y, (f,f',v) \in Y -> 
   InA sim_dec3 (DER Y) (der true f, der true f',true::v).
@@ -360,10 +357,10 @@ move => X hp hi [ | hdY tlY] hpred1 hpred2.
 - move/ldisjointP => hd.
   set Z := (X ++ hdY :: tlY).
   apply: (hi Z _ _ (lminus sim_dec3 (DER (hdY :: tlY)) Z)).
-  + apply (gpred_list_incl (@ders2der E F)). by apply gpred_list_cat. 
-  + apply/(@sub_elim _ _ _ sim_dec3); split.
-    move => x hx. rewrite InA_cat. by rewrite hx.
-    exists hdY. move : (hd _ hdY). case: (InA sim_dec3 X hdY) => //=.
+  + apply (gpred_list_incl (@ders2der E F)). by apply gpred_list_cat.
+  + apply/(@sub_elim _ _ _ sim_dec3). 
+    split; first by move => x hx; rewrite InA_cat hx.
+    exists hdY. move : (hd hdY). case: (InA sim_dec3 X hdY) => //=.
     case : sim_dec3 => //=. move => _. by case. 
     case; by reflexivity. rewrite InA_cat /=.
     case: sim_dec3 => //=. by rewrite orbT.
@@ -382,7 +379,6 @@ apply (guard 100). move => X'. apply: wf_sup.
 - by apply: Set_of_der_compat.
 - by apply: set_pair_der_finite.
 Defined.
-
 
 (* simple proof of (e,f) \in [ (e,f) ] *)
 Lemma EF_in_der : forall (E F:bregexp), gpred_list (Prod (set_pair_ders E F) bT) [:: (E,F,[::])].
@@ -441,7 +437,6 @@ move => X hp hi [ | hdY tlY] hp1 hp2 /=.
 - move => hd. by apply: hi. 
 Qed.
 
-
 (** 3: the list is stable by derivation *)
 Lemma l3 : forall (E F:bregexp),
  forall (X Y:seq (bregexp* bregexp*bword))
@@ -465,7 +460,6 @@ move => X hp hi [ | hdY tlY] hp1 hp2 /=.
   by apply: sim_incl_cat2l. 
   by rewrite lminus_incl.
 Qed.
-
 
 (** Function which test the equivalence of regular expression *)
 Definition bregexp_eq (r1 r2: bregexp) : bool :=
@@ -505,9 +499,6 @@ case : (bregexp_eq r1 r2). move => h. left. by apply/h.
 move => h. right. by move/h.
 Qed.
 
-
-
-
 (** For free: Inclusion for languages *)
 Definition SUB (r1 r2: bregexp) := forall s, (s \in r1) -> (s \in r2).
 
@@ -518,8 +509,6 @@ rewrite /SUB /EQUIV => r1 r2; split => h s.
   move => h'; by right. case => hu //. by apply: h.
 - rewrite (h s) -!topredE /= => h1. apply/orP. by left.
 Qed. 
-
-
 
 (** To test the inclusion of L(r1) in L(r2), it suffices to test
     that r1 + r2 and r2 are equivalent *)
@@ -538,7 +527,7 @@ Qed.
     witness *)
 Fixpoint extract_word (l: seq (bregexp*bregexp*bword)) : option bword :=
  match l with
-  | Nil => None
+  | [::] => None
   | ((a,b),u) :: tl => if has_eps a == has_eps b 
                        then extract_word tl
                        else Some u
@@ -560,12 +549,11 @@ case heq : (has_eps a == has_eps b) => //=.
 - by exists a; exists b; rewrite in_cons heq eq_refl.
 Qed.
 
-
 (* begin hide *)
 Definition ff (r1 r2:bregexp) (efw:bregexp*bregexp*bword) :=
  let (ef,w) := efw in let (e,f) := ef in 
   (wder (rev w) r1) ≡ e /\
-  (wder (rev w) r2) ≡ f. 
+  (wder (rev w) r2) ≡ f.
 
 Lemma wder_rcons : forall  a u (r:bregexp), 
   wder (rcons u a) r = der a (wder u r).

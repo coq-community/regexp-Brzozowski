@@ -1,7 +1,7 @@
 (* begin hide *)
-Require Import Mergesort Permutation.
-Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype.
-Require Import path.
+From Coq Require Import Mergesort Permutation.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype.
+From mathcomp Require Import path.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -14,7 +14,7 @@ Proof.
 by case => [] [] .
 Qed.
 
-Fixpoint eq_comparison (a b:comparison) : bool := match a,b with
+Definition eq_comparison (a b:comparison) : bool := match a,b with
  | Lt,Lt => true
  | Eq,Eq => true
  | Gt,Gt => true
@@ -174,18 +174,18 @@ Qed.
 
 Lemma tool_undup_size2 : forall (l l': seq T), size (undup l) <= size (undup (l++l')).
 Proof.
-move => l l'. rewrite (@perm_eq_size _ (undup (l ++ l')) (undup (l'++l))).
-by apply tool_undup_size. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq.
+move => l l'. rewrite (@perm_size _ (undup (l ++ l')) (undup (l'++l))).
+by apply tool_undup_size. apply uniq_perm. by apply undup_uniq. by apply undup_uniq.
 move => u. rewrite !mem_undup !mem_cat. by apply orbC.
 Qed.
 
 Lemma merge_sort_sym : forall (hR1:transitive R) (hR2: antisymmetric R) (hR3: total R)
  (l1 l2:seq T), sorted R l1 -> sorted R l2 -> merge R l1 l2 = merge R l2 l1.
 Proof.
-move => hR1 hR2 hR3 l1 l2 h1 h2. apply (eq_sorted hR1 hR2).
-by apply sorted_merge.
-by apply sorted_merge.
-by rewrite perm_merge perm_eq_sym perm_merge perm_catC.
+move => hR1 hR2 hR3 l1 l2 h1 h2; apply (sorted_eq hR1 hR2).
+- by apply merge_sorted.
+- by apply merge_sorted.
+- by rewrite perm_merge perm_sym perm_merge perm_catC.
 Qed.
 
 Lemma tool_normP_in : forall (hd:T) tl l, perm_eq (hd::tl) l ->
@@ -193,10 +193,10 @@ Lemma tool_normP_in : forall (hd:T) tl l, perm_eq (hd::tl) l ->
 Proof.
 move => hd tl l hp.
 have hs: (splitr hd l).
-- apply: splitPr. rewrite -(perm_eq_mem hp). by rewrite in_cons eq_refl.
+- apply: splitPr. rewrite -(perm_mem hp). by rewrite in_cons eq_refl.
 case: hs hp => l1 l2 hp.  exists l1; exists l2;  split => //.
-apply: perm_eq_mem. move: hp.
-by rewrite -[hd :: l2]cat1s perm_eq_sym perm_catCA /= perm_cons perm_eq_sym.
+apply: perm_mem. move: hp.
+by rewrite -[hd :: l2]cat1s perm_sym perm_catCA /= perm_cons perm_sym.
 Qed.
 
 (** boolean operator to check inclusion of lists:
@@ -277,5 +277,3 @@ Qed.
 
 
 End Glue2.
-
-

@@ -1,0 +1,12 @@
+-R src RegexpBrzozowski
+
+-arg -w -arg -notation-overridden
+
+src/glue.v
+src/regexp.v
+src/gfinset.v
+src/finite_der.v
+src/sim1.v
+src/sim2.v
+src/equiv.v
+src/ex.v
