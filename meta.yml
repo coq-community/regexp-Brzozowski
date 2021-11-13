@@ -1,0 +1,94 @@
+---
+fullname: Regexp Brzozowski
+shortname: regexp-Brzozowski
+opam_name: coq-regexp-brzozowski
+organization: coq-community
+community: true
+action: true
+coqdoc: false
+doi: 10.1007/978-3-642-25379-9_11
+
+synopsis: >-
+  Regular expression equivalence in Coq using Mathematical Components
+
+description: |-
+  Coq library that formalizes a decision procedure for regular
+  expression equivalence in type theory, using the Mathematical
+  Components library.
+
+publications:
+- pub_url: https://link.springer.com/chapter/10.1007%2F978-3-642-25379-9_11
+  pub_title: A Decision Procedure for Regular Expression Equivalence in Type Theory
+  pub_doi: 10.1007/978-3-642-25379-9_11
+
+authors:
+- name: Thierry Coquand
+  initial: true
+- name: Vincent Siles
+  initial: true
+
+maintainers:
+- name: Anton Trunov
+  nickname: anton-trunov
+
+opam-file-maintainer: palmskog@gmail.com
+
+opam-file-version: dev
+
+license:
+  fullname: MIT License
+  identifier: MIT
+
+supported_coq_versions:
+  text: 8.10 or later
+  opam: '{(>= "8.10" & < "8.15~") | (= "dev")}'
+
+dependencies:
+- opam:
+    name: coq-mathcomp-ssreflect
+    version: '{(>= "1.12.0" & < "1.14~") | (= "dev")}'
+  description: |-
+    [MathComp](https://math-comp.github.io) 1.12.0 or later (`ssreflect` suffices)
+
+tested_coq_opam_versions:
+- version: 'coq-dev'
+  repo: 'mathcomp/mathcomp-dev'
+- version: '1.13.0-coq-8.14'
+  repo: 'mathcomp/mathcomp'
+- version: '1.13.0-coq-8.13'
+  repo: 'mathcomp/mathcomp'
+- version: '1.12.0-coq-8.12'
+  repo: 'mathcomp/mathcomp'
+- version: '1.12.0-coq-8.11'
+  repo: 'mathcomp/mathcomp'
+- version: '1.12.0-coq-8.10'
+  repo: 'mathcomp/mathcomp'
+
+namespace: RegexpBrzozowski
+
+keywords:
+- name: regular expressions
+- name: decision procedure
+
+categories:
+- name: Computer Science/Decision Procedures and Certified Algorithms/Correctness proofs of algorithms
+- name: Computer Science/Formal Languages Theory and Automata
+
+build: |-
+ ## Building instructions
+
+ ``` shell
+ git clone https://github.com/coq-community/regexp-Brzozowski
+ cd regexp-Brzozowski
+ make   # or make -j <number-of-cores-on-your-machine>
+ ```
+
+documentation: |-
+  ## Documentation
+
+  This paper was written at Chalmers, in the ForMath Project.
+  More information about the project and its achievement is available
+  on the Chalmers website:
+  - http://wiki.portal.chalmers.se/cse/pmwiki.php/ForMath
+  - http://wiki.portal.chalmers.se/cse/pmwiki.php/ForMath/PapersAndSlides
+---
