@@ -1,6 +1,7 @@
 (* begin hide *)
-Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
-Require Import bigop path glue.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
+From mathcomp Require Import bigop path.
+Require Import glue.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
@@ -53,14 +54,13 @@ Definition plus L1 L2 : language := [predU L1 & L2].
 (** the language of words which are the concatenation of a word of L1 and
    a word of L2 *)
 Definition conc L1 L2 : language := 
-  fun v => existsb i : 'I_(size v).+1, L1 (take i v) && L2 (drop i v). 
-
+  fun v => [exists i : 'I_(size v).+1, L1 (take i v) && L2 (drop i v)].
 
 (** the language of words which are in L1 _and_ in L2 *)
 Definition prod L1 L2 : language := [predI L1 & L2].
 
 Lemma prodP : forall {L1 L2 v},
-   (v \in prod L1 L2) = (v \in L1) && (v \in L2 ). 
+   (v \in prod L1 L2) = (v \in L1) && (v \in L2 ).
 Proof.
 by move => L1 L2 v; rewrite inE.
 Qed.
@@ -76,28 +76,23 @@ have lt_v1_v: size v1 < (size v).+1
    by rewrite def_v size_cat ltnS leq_addr. 
 exists (Ordinal lt_v1_v); rewrite /= def_v. 
 by rewrite take_size_cat // [L1 v1]Lv1 drop_size_cat. 
-Qed. 
+Qed.
 
 (* Complementary is involutive *)
 Lemma compl_invol : forall { L }, compl (compl L) =i  L.
 Proof.
- move => L v; rewrite inE /= /compl /=. by rewrite negb_involutive.
-Qed.
-  
+ by move => L v; rewrite inE /= /compl /= negbK.
+Qed. 
 
 Lemma complP : forall { L v}, (v \in compl L ) = ( v \notin L).
-Proof.
-done.
-Qed.
+Proof. by []. Qed.
 
 (** The residual of a language L with respect to x is the 
    set of words w such that xw is in L *)
 Definition residual x L : language := [preim cons x of L]. 
  
 Lemma residualE : forall x L u, (u \in residual x L) = (x :: u \in L). 
-Proof. 
-by []. 
-Qed. 
+Proof. by []. Qed.
 
 (** The Kleene star operator *)
 Definition star L : language := 
@@ -118,7 +113,7 @@ apply: (iffP concP) => [[u Lxu [v' starLv' def_v]] | [[|[|y u] vv] //=]].
 case/andP=> Lyu Lvv [def_x def_v]; exists u; first by rewrite def_x.   
 exists (flatten vv) => //; apply/IHn; last by exists vv.   
 by rewrite -ltnS (leq_trans _ le_v_n) // def_v size_cat !ltnS leq_addl. 
-Qed. 
+Qed.
 
 (** Extended regular expression with boolean operators *)
 Inductive regular_expression :=  
@@ -192,7 +187,7 @@ Fixpoint mem_reg e :=
   | Not e1 => compl (mem_reg e1)
   end. 
 
-Canonical Structure req_exp_predType := mkPredType mem_reg. 
+Canonical Structure req_exp_predType := PredType mem_reg.
 
 
 (** The delta operator:

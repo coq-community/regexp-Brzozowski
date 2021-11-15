@@ -1,6 +1,6 @@
 (* begin hide *)
-Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
-Require Import bigop path.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
+From mathcomp Require Import bigop path.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 

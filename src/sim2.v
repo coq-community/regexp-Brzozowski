@@ -1,8 +1,8 @@
 (* begin hide *)
-Require Import RelationClasses Setoid Morphisms.
-Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
-Require Import bigop path glue regexp.
-Require Import finite_der equiv.
+From Coq Require Import RelationClasses Setoid Morphisms.
+From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
+From mathcomp Require Import bigop path.
+Require Import glue regexp finite_der equiv.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
@@ -121,7 +121,7 @@ end.
    by computing the language of its translation to usual presentation *)
 Definition mem_creg r := mem_reg (creg_to_reg r).
 
-Canonical Structure can_reg_exp_predType := mkPredType mem_creg.
+Canonical Structure can_reg_exp_predType := PredType mem_creg.
 (* end hide *)
 
 
@@ -1098,9 +1098,10 @@ Qed.
 (* Other usefull smart constructors in practice, but never used here *)
 Definition mkOpt r := mkPlus CEps r.
 
-Fixpoint isEmpty r := match r with
- | CVoid => true
- | _ => false
+Definition isEmpty r :=
+match r with
+| CVoid => true
+| _ => false
 end.
 
 
@@ -1135,7 +1136,7 @@ elim => [ | | | s | c1 hc1 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 
     move/orP : h2 => [h1 | h2] //. by rewrite hc2.
 - rewrite mem_mkAnd. rewrite -!topredE /= /mem_creg /=. apply/andP/andP; rewrite !inE => [[h1 h2]].
   * by rewrite -hc1 -hc2 h1 h2 andbT.
-  * move/andP: h2 => [[h2 h3]]. by rewrite hc1 h1 hc2 h2.
+  * move/andP: h2 => [h2 h3]. by rewrite hc1 h1 hc2 h2.
 - rewrite mem_mkConc. rewrite -!topredE /= /mem_creg /=. apply/concP/concP.
   * case => v1 hv1 [v2 hv2 heq]. exists v1. rewrite -hc1 hv1 //. exists v2 => //.
     apply/concP. exists v2. by rewrite -hc2.  by exists nil => //; rewrite cats0.
@@ -1169,18 +1170,18 @@ move => r1 r2. case: (toolmkPlus r1).
   + case => l' heq2; rewrite (eqP heq2) /mkPlus.
     rewrite /merge' merge_sort_sym => //. by apply: leS_trans.
     by apply : leS_antisym. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
   + move => h; rewrite toolmkPlus2_r ?toolmkPlus2_l => //.
     rewrite /merge' merge_sort_sym => //. by apply: leS_trans.
     by apply : leS_antisym. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
 - move => h. case: (toolmkPlus r2).
   + by move => heq; rewrite (eqP heq) mkPlus_CVoid_lt mkPlus_CVoid_rt.
   + case => l heq; rewrite (eqP heq) toolmkPlus2_l ?toolmkPlus2_r => //.
     rewrite /merge' merge_sort_sym => //. by apply: leS_trans.
     by apply : leS_antisym. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
   + move => h'. rewrite toolmkPlus3 ?toolmkPlus3 => //.
     rewrite compare_neg. move: (@compare_eq_axiom r2 r1).
     case: (compare r2 r1) => //=.  by move => ->. 
@@ -1199,19 +1200,19 @@ move => r1 r2. case: (toolmkAnd r1).
   + case => l' heq2; rewrite (eqP heq2). rewrite /mkAnd.
     rewrite /merge' merge_sort_sym => //. by apply: leS_trans.
     by apply : leS_antisym. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
   + move => h. rewrite toolmkAnd2_r  ?toolmkAnd2_l => //. 
     rewrite /merge' merge_sort_sym => //. by apply: leS_trans.
     by apply : leS_antisym. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
 - move => h. case: (toolmkAnd r2).
   + by move => heq; rewrite (eqP heq) mkAnd_CVoid_lt mkAnd_CVoid_rt.
   + by move => heq2; rewrite (eqP heq2) mkAnd_CAll_lt mkAnd_CAll_rt.
   + case => l heq; rewrite (eqP heq). rewrite toolmkAnd2_l ?toolmkAnd2_r => //.
     rewrite /merge' merge_sort_sym => //. by apply: leS_trans.
     by apply : leS_antisym. by apply: leS_total.
-    apply: sorted_sort. by apply: leS_total.
+    apply: sort_sorted. by apply: leS_total.
   + move => h'. rewrite toolmkAnd3 ?toolmkAnd3 => //. 
     rewrite compare_neg. move: (@compare_eq_axiom r2 r1).
     case : (compare r2 r1) => //=. by move => ->. 
@@ -1252,9 +1253,9 @@ Proof.
 move => l1 l2; rewrite !wf_re_CPlus /mkPlus. case/and4P => hs1 hu1 hst1 ha1.
 case/and4P => hs2 hu2 hst2 ha2 /=.
 have : (2 <= size (undup (merge' (sort' l1) (sort' l2)))).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' l1) (sort' l2))) (undup (l1++l2))).
+  rewrite (@perm_size _ (undup (merge' (sort' l1) (sort' l2))) (undup (l1++l2))).
   apply (@leq_trans (size l2)). done. rewrite -{1}(@undup_id  _ l2). apply tool_undup_size. 
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq.
   move => u. by rewrite !mem_undup mem_merge !mem_cat !mem_sort.
 clear hu1 hu2 hst2 hst2 ha1 ha2. case: (undup (merge' (sort' l1) (sort' l2))) => //.
 move => hd. by case => //=.
@@ -1267,9 +1268,9 @@ Proof.
 move => l1 r2; rewrite !wf_re_CPlus. case/and4P => hs1 hu1 hst1 ha1.
 move => hw2 hh.
 have : (2 <= size (undup (merge' (sort' l1) [::r2]))).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' l1) [::r2])) (undup (l1++[::r2]))).
+  rewrite (@perm_size _ (undup (merge' (sort' l1) [::r2])) (undup (l1++[::r2]))).
   apply (@leq_trans (size l1)). done. rewrite -{1}(@undup_id _ l1). apply tool_undup_size2. 
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq.
   move => u. by rewrite !mem_undup mem_merge !mem_cat !mem_sort.
 rewrite toolmkPlus2_r => //. clear hu1 hs1 hst1 ha1.
 case: (undup (merge' (sort' l1) [::r2])) => //.
@@ -1282,7 +1283,7 @@ Lemma mkPlus_unfold3: forall l1 r2, wf_re (CPlus l1) -> wf_re r2 ->
 Proof.
 move => l1 r2 h1 h2 h3. rewrite mkPlusC. rewrite /merge' merge_sort_sym =>//.
 by apply: mkPlus_unfold2. by apply: leS_trans. by apply: leS_antisym.
-by apply: leS_total. apply: sorted_sort. by apply: leS_total.
+by apply: leS_total. apply: sort_sorted. by apply: leS_total.
 Qed.
 
 Lemma mkAnd_unfold: forall l1 l2, wf_re (CAnd l1) -> wf_re (CAnd l2) -> 
@@ -1291,9 +1292,9 @@ Proof.
 move => l1 l2; rewrite !wf_re_CAnd. case/and4P => hs1 hu1 hst1 ha1.
 case/and4P => hs2 hu2 hst2 ha2 /=.
 have : (2 <= size (undup (merge' (sort' l1) (sort' l2)))).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' l1) (sort' l2))) (undup (l1++l2))).
+  rewrite (@perm_size _ (undup (merge' (sort' l1) (sort' l2))) (undup (l1++l2))).
   apply (@leq_trans (size l2)). done. rewrite -{1}(@undup_id  _ l2). apply tool_undup_size. 
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq.
   move => u. by rewrite !mem_undup mem_merge !mem_cat !mem_sort.
 clear hu1 hu2 hst2 hst2 ha1 ha2. rewrite /mkAnd. case: (undup (merge' (sort' l1) (sort' l2))) => //.
 move => hd. by case => //=.
@@ -1306,15 +1307,14 @@ Proof.
 move => l1 r2; rewrite !wf_re_CAnd. case/and4P => hs1 hu1 hst1 ha1.
 move => hw2 hh.
 have : (2 <= size (undup (merge' (sort' l1) [::r2]))).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' l1) [::r2])) (undup (l1++[::r2]))).
+  rewrite (@perm_size _ (undup (merge' (sort' l1) [::r2])) (undup (l1++[::r2]))).
   apply (@leq_trans (size l1)). done. rewrite -{1}(@undup_id _ l1). apply tool_undup_size2. 
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq.
   move => u. by rewrite !mem_undup mem_merge !mem_cat !mem_sort.
 rewrite toolmkAnd2_r  => //. clear hu1 hs1 hst1 ha1.
 case: (undup (merge' (sort' l1) [::r2])) => //.
 move => hd. by case => //=.
 Qed.
-
 
 Lemma mkAnd_unfold3: forall l1 r2, wf_re (CAnd l1) -> wf_re r2 -> 
   [/\ r2 != CVoid , r2 != CNot CVoid & (forall l, r2 != CAnd l)] ->
@@ -1322,7 +1322,7 @@ Lemma mkAnd_unfold3: forall l1 r2, wf_re (CAnd l1) -> wf_re r2 ->
 Proof.
 move => l1 r2 h1 h2 h3. rewrite mkAndC. rewrite /merge' merge_sort_sym =>//.
 by apply: mkAnd_unfold2. by apply: leS_trans. by apply: leS_antisym.
-by apply: leS_total. apply: sorted_sort. by apply: leS_total.
+by apply: leS_total. apply: sort_sorted. by apply: leS_total.
 Qed.
 
 (* Note to self: the following proofs should be simplified *)
@@ -1349,8 +1349,8 @@ case/and3P => hh1 hh2. move/allP => hh3.  apply/and3P ; split.
 have : uniq [:: hd , hd2 & tl]. rewrite -heq. by rewrite undup_uniq. move => hu.  apply/and3P; split.
 by case/and3P : hu. by case/and3P: hu. by case/and3P: hu.
 have: sorted cregexp_le [:: hd, hd2 & tl]. rewrite -heq. rewrite sorted_undup => //.
-by apply: leS_trans. apply sorted_merge. by apply leS_total. apply: sorted_sort. by apply leS_total.
-apply: sorted_sort. by apply leS_total. move => hs. 
+by apply: leS_trans. apply merge_sorted. by apply leS_total. apply: sort_sorted. by apply leS_total.
+apply: sort_sorted. by apply leS_total. move => hs. 
 apply/andP; split. by case/andP: hs. by case/andP: hs. 
 apply/and3P; split. rewrite mem_cat in hh1.
 case/orP : hh1 => hh1. by apply: ha1. by apply: ha2. rewrite mem_cat in hh2.
@@ -1381,8 +1381,8 @@ case/andP. case/andP => hh1 hh2. move/allP => hh3.  apply/andP; split.
 have : uniq [:: hd , hd2 & tl]. rewrite -heq. by rewrite undup_uniq. case/andP => hu. case/andP => hu' htl.
 apply/andP; split => //.  by apply/andP; split.
 have: sorted cregexp_le [:: hd, hd2 & tl]. rewrite -heq. rewrite sorted_undup => //.
-by apply: leS_trans. apply sorted_merge. by apply leS_total. apply: sorted_sort. by apply leS_total.
-apply: sorted_sort. by apply leS_total. case/andP => hss1 hss2.
+by apply: leS_trans. apply merge_sorted. by apply leS_total. apply: sort_sorted. by apply leS_total.
+apply: sort_sorted. by apply leS_total. case/andP => hss1 hss2.
 apply/andP; split. by apply/andP; split. apply/andP; split.  rewrite mem_cat in hh1.
 case/orP : hh1 => hh1. by apply: ha1. by apply: ha2. apply/andP; split. rewrite mem_cat in hh2.
 case/orP : hh2 => hh2. by apply: ha1. by apply: ha2. apply/allP => x hx. 
@@ -1410,7 +1410,7 @@ move => heq. have : (hd \in l1 ++ [:: r2]) && (hd2 \in l1 ++ [::r2]) && (all (fu
 case/andP. case/andP => hh3 hh4. move/allP => hh5.  apply/andP; split.
 have : uniq [:: hd , hd2 & tl]. rewrite -heq. by rewrite undup_uniq. done.  apply/andP; split.
 have : sorted cregexp_le [:: hd, hd2 & tl]. rewrite -heq. rewrite sorted_undup => //.
-by apply: leS_trans. apply sorted_merge. by apply leS_total. apply: sorted_sort. by apply leS_total.
+by apply: leS_trans. apply merge_sorted. by apply leS_total. apply: sort_sorted. by apply leS_total.
 done. case/andP => hss1 hss2.
 by apply/andP; split. apply/andP; split. rewrite mem_cat in hh3. case/orP : hh3 => hh3. by apply: h4.
 rewrite mem_seq1 in hh3. by rewrite (eqP hh3). apply/andP; split.
@@ -1444,7 +1444,7 @@ case/andP. case/andP => hh4 hh5. move/allP => hh6.  apply/andP; split.
 have : uniq [:: hd , hd2 & tl]. rewrite -heq. by rewrite undup_uniq. done. 
 apply/andP; split.
 have : sorted cregexp_le [:: hd, hd2 & tl]. rewrite -heq. rewrite sorted_undup => //.
-by apply: leS_trans. apply sorted_merge. by apply leS_total. apply: sorted_sort. by apply leS_total.
+by apply: leS_trans. apply merge_sorted. by apply leS_total. apply: sort_sorted. by apply leS_total.
 done. case/andP => hss1 hss2.
 by apply/andP; split.
 apply/andP; split. rewrite mem_cat in hh4. case/orP : hh4 => hh4. by apply: h4.
@@ -1543,17 +1543,16 @@ Proof.
 case => [ | | | s | c | l | l | l | c ] //=; try(
   by rewrite /mkPlus compare_refl).
 move => h. rewrite mkPlus_unfold => //. f_equal.
-apply : (@eq_sorted _ cregexp_le). by apply: leS_trans.
+apply : (@sorted_eq _ cregexp_le). by apply: leS_trans.
 by apply: leS_antisym. apply: sorted_undup.
-by apply: leS_trans. apply: sorted_merge. by apply: leS_total.
-apply : sorted_sort. by apply : leS_total.
-apply: sorted_sort. by apply: leS_total.
+by apply: leS_trans. apply: merge_sorted. by apply: leS_total.
+apply : sort_sorted. by apply : leS_total.
+apply: sort_sorted. by apply: leS_total.
 by case/and4P: h.
-apply: uniq_perm_eq. apply undup_uniq. by case/and4P: h.
+apply: uniq_perm. apply undup_uniq. by case/and4P: h.
 move => u. rewrite mem_undup mem_merge mem_cat !mem_sort.
 by apply/orP/idP; [case | left].
 Qed.
-
 
 (** mkAnd get rid of duplicates (requires wf) *)
 
@@ -1562,13 +1561,13 @@ Proof.
 case => [ | | | s | c | l | l | l | c ] //=; try (
    by rewrite /mkAnd compare_refl).
 - move => h. rewrite mkAnd_unfold => //. f_equal.
-  apply : (@eq_sorted _ cregexp_le). by apply: leS_trans.
+  apply : (@sorted_eq _ cregexp_le). by apply: leS_trans.
   by apply: leS_antisym. apply: sorted_undup.
-  by apply: leS_trans. apply: sorted_merge. by apply: leS_total.
-  apply : sorted_sort. by apply : leS_total.
-  apply: sorted_sort. by apply: leS_total.
+  by apply: leS_trans. apply: merge_sorted. by apply: leS_total.
+  apply : sort_sorted. by apply : leS_total.
+  apply: sort_sorted. by apply: leS_total.
   by case/and4P: h.
-  apply: uniq_perm_eq. apply undup_uniq. by case/and4P: h.
+  apply: uniq_perm. apply undup_uniq. by case/and4P: h.
   move => u. rewrite mem_undup mem_merge mem_cat !mem_sort.
   by apply/orP/idP; [case | left].
 - case: c => [ | | | s | c' | l | l | l | c' ] //= ; 
@@ -1602,10 +1601,10 @@ move => r1. case: (toolmkConc r1).
   * case. case: r2 => [ | | | t | d | k | k | k | d ] //=. 
     + move => _ _ _ hr2. apply/andP; split.
       rewrite size_cat /=; change 1 with (0+1); rewrite ltn_add2r; by apply (@ltn_trans 1).
-      by rewrite all_cat h2 hr2.
+      by rewrite all_cat /= andbT.
     + move => _ _ _ hr2. apply/andP; split.
       rewrite size_cat /=; change 1 with (0+1); rewrite ltn_add2r; by apply (@ltn_trans 1).
-      by rewrite all_cat h2 hr2.
+      by rewrite all_cat andbT.
     + move => _ _ _ hr2. apply/andP; split.
       rewrite size_cat /=; change 1 with (0+1); rewrite ltn_add2r; by apply (@ltn_trans 1).
       by rewrite all_cat h2 /= andbT.
@@ -1626,7 +1625,7 @@ move => r1. case: (toolmkConc r1).
     case/andP => h1 h2. rewrite mkConc_unfold2 => //=.
     rewrite h2 hw1 !andbT. by apply (@ltn_trans (size l)).
   * move => hr2 hw2. rewrite mkConc_unfold3 => //=. by rewrite hw1 hw2.
-Qed.    
+Qed.
 
 Lemma wf_CStar : forall c, wf_re c -> wf_re (mkStar c).
 Proof.
@@ -1662,13 +1661,13 @@ Lemma mkPlusAC_plus_plus_plus: forall l1 l2 l3, wf_re (CPlus l1) ->
  mkPlus (mkPlus (CPlus l1) (CPlus l2)) (CPlus l3) = mkPlus (mkPlus (CPlus l1) (CPlus l3)) (CPlus l2).
 Proof.
 move => l1 l2 l3 hw1 hw2 hw3.
-rewrite !mkPlus_unfold => //. f_equal. apply (@eq_sorted _ cregexp_le).
+rewrite !mkPlus_unfold => //. f_equal. apply (@sorted_eq _ cregexp_le).
 by apply leS_trans. by apply leS_antisym.
-apply : sorted_undup. by apply leS_trans. apply : sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. apply sorted_sort. by apply leS_total.
-apply : sorted_undup. by apply leS_trans. apply : sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. apply sorted_sort. by apply leS_total.
-apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+apply : sorted_undup. by apply leS_trans. apply : merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. apply sort_sorted. by apply leS_total.
+apply : sorted_undup. by apply leS_trans. apply : merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. apply sort_sorted. by apply leS_total.
+apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
 rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_undup !mem_merge !mem_cat !mem_sort.
 by rewrite orbAC. rewrite -mkPlus_unfold => //. by apply wf_CPlus. rewrite -mkPlus_unfold => //. by apply wf_CPlus.
 Qed.
@@ -1678,13 +1677,13 @@ Lemma mkAndAC_and_and_and: forall l1 l2 l3, wf_re (CAnd l1) ->
  mkAnd (mkAnd (CAnd l1) (CAnd l2)) (CAnd l3) = mkAnd (mkAnd (CAnd l1) (CAnd l3)) (CAnd l2).
 Proof.
 move => l1 l2 l3 hw1 hw2 hw3.
-rewrite !mkAnd_unfold => //. f_equal. apply (@eq_sorted _ cregexp_le).
+rewrite !mkAnd_unfold => //. f_equal. apply (@sorted_eq _ cregexp_le).
 by apply leS_trans. by apply leS_antisym.
-apply : sorted_undup. by apply leS_trans. apply : sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. apply sorted_sort. by apply leS_total.
-apply : sorted_undup. by apply leS_trans. apply : sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. apply sorted_sort. by apply leS_total.
-apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+apply : sorted_undup. by apply leS_trans. apply : merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. apply sort_sorted. by apply leS_total.
+apply : sorted_undup. by apply leS_trans. apply : merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. apply sort_sorted. by apply leS_total.
+apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
 rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_undup !mem_merge !mem_cat !mem_sort.
 by rewrite orbAC. rewrite -mkAnd_unfold => //. by apply wf_CAnd. rewrite -mkAnd_unfold => //. by apply wf_CAnd.
 Qed.
@@ -1698,45 +1697,44 @@ Proof.
 move => l1 l2 r3 hw1 hw2 hw3 hh.
 rewrite mkPlus_unfold => //. rewrite !toolmkPlus2_r => //.
 have hs1 : 2 <= size (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [:: r3])).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [::r3])) (undup (l1++l2++[::r3]))).
+  rewrite (@perm_size _ (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [::r3])) (undup (l1++l2++[::r3]))).
   rewrite wf_re_CPlus in hw1. case/and4P : hw1 => h1 h2 h3 _.
   apply (@leq_trans (size l1)).  done. rewrite -{1}(@undup_id _ l1). by apply tool_undup_size2.
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
   by rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_undup !mem_merge !mem_cat !mem_sort orbA.
 have hs2 : (2 <= size (undup (merge' (sort' l1) [::r3]))).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' l1) [::r3])) (undup (l1++[::r3]))).
+  rewrite (@perm_size _ (undup (merge' (sort' l1) [::r3])) (undup (l1++[::r3]))).
   rewrite wf_re_CPlus in hw1. case/and4P : hw1 => h1 h2 h3 _.
   apply (@leq_trans (size l1)).  done. rewrite -{1}(@undup_id _ l1). by apply tool_undup_size2.
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
   by rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
 replace (match undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [:: r3]) with
-  | Nil => CVoid
+  | [::] => CVoid
   | [:: c] => c
   | [:: c, s1 & s2] => CPlus [:: c, s1 & s2]
 end) with (CPlus (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [:: r3]))).
 replace (match undup (merge' (sort' l1) [:: r3]) with
-  | Nil => CVoid
+  | [::] => CVoid
   | [:: c] => c
   | [:: c, s1 & s2] => CPlus [:: c, s1 & s2]
 end) with (CPlus (undup (merge' (sort' l1) [::r3]))).
 rewrite mkPlus_unfold. f_equal.
-apply (@eq_sorted _ cregexp_le). by apply leS_trans. by apply leS_antisym.
-apply sorted_undup. by apply leS_trans. apply sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. done. 
-apply sorted_undup. by apply leS_trans. apply sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. apply sorted_sort. by apply leS_total.
-apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+apply (@sorted_eq _ cregexp_le). by apply leS_trans. by apply leS_antisym.
+apply sorted_undup. by apply leS_trans. apply merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. done. 
+apply sorted_undup. by apply leS_trans. apply merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. apply sort_sorted. by apply leS_total.
+apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
 by rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_undup !mem_merge !mem_cat !mem_sort orbAC.
 rewrite wf_re_CPlus. apply/and4P; split. done. by apply undup_uniq. rewrite  sorted_undup => //.
-by apply leS_trans. apply sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. done. move :hw1. rewrite wf_re_CPlus.
+by apply leS_trans. apply merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. done. move :hw1. rewrite wf_re_CPlus.
 case/and4P => _  _ _. move/allP => hall. apply/allP => x. rewrite mem_undup mem_merge mem_cat !mem_sort.
 case/orP. by move => hu; apply: hall. rewrite mem_seq1 => heq. by rewrite (eqP heq). done.
 move : hs2. case: (undup (merge' (sort' l1) [::r3])) => //. move => hd. by case.
 move : hs1. case: (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [::r3])) => // hd.
 by case.
 Qed.
-
 
 Lemma mkAndAC_and_and_nand: forall l1 l2 r3, wf_re (CAnd l1) ->
   wf_re (CAnd l2) -> wf_re r3 -> 
@@ -1746,46 +1744,45 @@ Proof.
 move => l1 l2 r3 hw1 hw2 hw3 hh.
 rewrite mkAnd_unfold => //. rewrite !toolmkAnd2_r => //.
 have hs1 : 2 <= size (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [:: r3])).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [::r3])) (undup (l1++l2++[::r3]))).
+  rewrite (@perm_size _ (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [::r3])) (undup (l1++l2++[::r3]))).
   rewrite wf_re_CAnd in hw1. case/and4P : hw1 => h1 h2 h3 _.
   apply (@leq_trans (size l1)).  done. rewrite -{1}(@undup_id _ l1). by apply tool_undup_size2.
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
   by rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_undup !mem_merge !mem_cat !mem_sort orbA.
 have hs2 : (2 <= size (undup (merge' (sort' l1) [::r3]))).
-  rewrite (@perm_eq_size _ (undup (merge' (sort' l1) [::r3])) (undup (l1++[::r3]))).
+  rewrite (@perm_size _ (undup (merge' (sort' l1) [::r3])) (undup (l1++[::r3]))).
   rewrite wf_re_CAnd in hw1. case/and4P : hw1 => h1 h2 h3 _.
   apply (@leq_trans (size l1)).  done. rewrite -{1}(@undup_id _ l1). by apply tool_undup_size2.
-  done. apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+  done. apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
   by rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
 replace (match undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [:: r3]) with
-  | Nil => CNot CVoid
+  | [::] => CNot CVoid
   | [:: c] => c
   | [:: c, s1 & s2] => CAnd [:: c, s1 & s2]
 end) with (CAnd (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [:: r3]))).
 replace (match undup (merge' (sort' l1) [:: r3]) with
-  | Nil => CNot CVoid
+  | [::] => CNot CVoid
   | [:: c] => c
   | [:: c, s1 & s2] => CAnd [:: c, s1 & s2]
 end) with (CAnd (undup (merge' (sort' l1) [::r3]))).
 rewrite mkAnd_unfold. f_equal.
-apply (@eq_sorted _ cregexp_le). by apply leS_trans. by apply leS_antisym.
-apply sorted_undup. by apply leS_trans. apply sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. done. 
-apply sorted_undup. by apply leS_trans. apply sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. apply sorted_sort. by apply leS_total.
-apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+apply (@sorted_eq _ cregexp_le). by apply leS_trans. by apply leS_antisym.
+apply sorted_undup. by apply leS_trans. apply merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. done. 
+apply sorted_undup. by apply leS_trans. apply merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. apply sort_sorted. by apply leS_total.
+apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
 by rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_undup !mem_merge !mem_cat !mem_sort orbAC.
 rewrite wf_re_CAnd. apply/and4P; split. 
 done. by apply undup_uniq. rewrite  sorted_undup => //.
-by apply leS_trans. apply sorted_merge. by apply leS_total.
-apply sorted_sort. by apply leS_total. done. move :hw1. rewrite wf_re_CAnd.
+by apply leS_trans. apply merge_sorted. by apply leS_total.
+apply sort_sorted. by apply leS_total. done. move :hw1. rewrite wf_re_CAnd.
 case/and4P => _ _ _. move/allP => hall. apply/allP => x. rewrite mem_undup mem_merge mem_cat !mem_sort.
 case/orP. by move => hu; apply: hall. rewrite mem_seq1 => heq. by rewrite (eqP heq). done.
 move : hs2. case: (undup (merge' (sort' l1) [::r3])) => //. move => hd. by case.
 move : hs1. case: (undup (merge' (sort' (undup (merge' (sort' l1) (sort' l2)))) [::r3])) => // hd.
 by case.
 Qed.
-
 
 Lemma mkPlusAC_nplus_nplus_plus : forall r1 r2 l3, wf_re r1 -> wf_re r2 -> wf_re (CPlus l3) ->
  (r1 != CVoid /\ (forall l, r1 != CPlus l)) ->
@@ -1796,25 +1793,25 @@ move => r1 r2 l3 hw1 hw2 hw3 hh1 hh2.
 rewrite (@toolmkPlus3 r1 r2) => //. rewrite (@mkPlus_unfold3 _ r1) => //.
 rewrite (@mkPlus_unfold2 _ r2) => //.
 case_eq (compare r1 r2) => heq.
-- rewrite mkPlus_unfold3 => //. f_equal. apply (@eq_sorted _ cregexp_le).
+- rewrite mkPlus_unfold3 => //. f_equal. apply (@sorted_eq _ cregexp_le).
   by apply leS_trans. by apply leS_antisym. apply sorted_undup.
-  by apply leS_trans. apply sorted_merge. by apply leS_total.
-  done. apply sorted_sort. by apply leS_total.
-  apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+  by apply leS_trans. apply merge_sorted. by apply leS_total.
+  done. apply sort_sorted. by apply leS_total.
+  apply sorted_undup. by apply leS_trans. apply merge_sorted. 
   by apply leS_total.
-  apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+  apply sort_sorted. by apply leS_total. done. apply uniq_perm.
   by apply undup_uniq. by apply undup_uniq. move => u.
   rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
   rewrite mem_undup mem_merge mem_cat !mem_sort !mem_seq1.
   rewrite (compare_eq_axiom heq). by rewrite orbAC orbb.
-- rewrite mkPlus_unfold => //. f_equal. apply (@eq_sorted _ cregexp_le).
+- rewrite mkPlus_unfold => //. f_equal. apply (@sorted_eq _ cregexp_le).
   by apply leS_trans. by apply leS_antisym. apply sorted_undup.
-  by apply leS_trans. apply sorted_merge. by apply leS_total.
-  apply sorted_sort. by apply leS_total. apply sorted_sort. 
+  by apply leS_trans. apply merge_sorted. by apply leS_total.
+  apply sort_sorted. by apply leS_total. apply sort_sorted. 
   by apply leS_total.
-  apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+  apply sorted_undup. by apply leS_trans. apply merge_sorted. 
   by apply leS_total.
-  apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+  apply sort_sorted. by apply leS_total. done. apply uniq_perm.
   by apply undup_uniq. by apply undup_uniq. move => u.
   rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
   rewrite mem_seq2 mem_undup mem_merge mem_cat !mem_sort !mem_seq1.
@@ -1824,14 +1821,14 @@ case_eq (compare r1 r2) => heq.
   rewrite (eqP heq2). by rewrite compare_refl.
   by rewrite andbT /cregexp_le /leS /cmpS /= heq.
   by rewrite hw2.
-- rewrite mkPlus_unfold => //. f_equal. apply (@eq_sorted _ cregexp_le).
+- rewrite mkPlus_unfold => //. f_equal. apply (@sorted_eq _ cregexp_le).
   by apply leS_trans. by apply leS_antisym. apply sorted_undup.
-  by apply leS_trans. apply sorted_merge. by apply leS_total.
-  apply sorted_sort. by apply leS_total. apply sorted_sort. 
+  by apply leS_trans. apply merge_sorted. by apply leS_total.
+  apply sort_sorted. by apply leS_total. apply sort_sorted. 
   by apply leS_total.
-  apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+  apply sorted_undup. by apply leS_trans. apply merge_sorted. 
   by apply leS_total.
-  apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+  apply sort_sorted. by apply leS_total. done. apply uniq_perm.
   by apply undup_uniq. by apply undup_uniq. move => u.
   rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
   rewrite mem_seq2 mem_undup mem_merge mem_cat !mem_sort !mem_seq1.
@@ -1844,18 +1841,17 @@ case_eq (compare r1 r2) => heq.
 move: hw3. rewrite !wf_re_CPlus. case/and4P => h3 h4 h5. move/allP => h6.
 apply/and4P; split. 
 apply (@leq_trans (size l3)) => //. 
-rewrite (@perm_eq_size _ (undup (merge' [::r1] (sort' l3))) 
+rewrite (@perm_size _ (undup (merge' [::r1] (sort' l3))) 
                          (undup ([::r1]++l3))).
 rewrite -{1}(@undup_id _ l3) => //. by apply tool_undup_size. 
-apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
 by rewrite !mem_undup mem_merge !mem_cat mem_sort !mem_seq1.
 by apply undup_uniq. apply sorted_undup. by apply leS_trans.
-apply sorted_merge =>// . by apply leS_total. apply sorted_sort.
+apply merge_sorted =>// . by apply leS_total. apply sort_sorted.
 by apply leS_total. apply/allP => x.
 rewrite mem_undup mem_merge mem_cat mem_sort mem_seq1.
 case/orP => hu. by rewrite (eqP hu).  by apply : h6.
 Qed.
-
 
 Lemma mkAndAC_nand_nand_and : forall r1 r2 l3, wf_re r1 -> wf_re r2 -> wf_re (CAnd l3) ->
  [/\ r1 != CVoid , r1 != CNot CVoid & (forall l, r1 != CAnd l)] ->
@@ -1866,25 +1862,25 @@ move => r1 r2 l3 hw1 hw2 hw3 hh1 hh2.
 rewrite (@toolmkAnd3 r1 r2) => //. rewrite (@mkAnd_unfold3 _ r1) => //.
 rewrite (@mkAnd_unfold2 _ r2) => //.
 case_eq (compare r1 r2) => heq.
-- rewrite mkAnd_unfold3 => //. f_equal. apply (@eq_sorted _ cregexp_le).
+- rewrite mkAnd_unfold3 => //. f_equal. apply (@sorted_eq _ cregexp_le).
   by apply leS_trans. by apply leS_antisym. apply sorted_undup.
-  by apply leS_trans. apply sorted_merge => //. by apply leS_total.
-  apply sorted_sort. by apply leS_total.
-  apply sorted_undup. by apply leS_trans. apply sorted_merge =>//.
+  by apply leS_trans. apply merge_sorted => //. by apply leS_total.
+  apply sort_sorted. by apply leS_total.
+  apply sorted_undup. by apply leS_trans. apply merge_sorted =>//.
   by apply leS_total.
-  apply sorted_sort. by apply leS_total. apply uniq_perm_eq.
+  apply sort_sorted. by apply leS_total. apply uniq_perm.
   by apply undup_uniq. by apply undup_uniq. move => u.
   rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
   rewrite mem_undup mem_merge mem_cat !mem_sort !mem_seq1.
   rewrite (compare_eq_axiom heq). by rewrite orbAC orbb.
-- rewrite mkAnd_unfold => //. f_equal. apply (@eq_sorted _ cregexp_le).
+- rewrite mkAnd_unfold => //. f_equal. apply (@sorted_eq _ cregexp_le).
   by apply leS_trans. by apply leS_antisym. apply sorted_undup.
-  by apply leS_trans. apply sorted_merge. by apply leS_total.
-  apply sorted_sort. by apply leS_total. apply sorted_sort. 
+  by apply leS_trans. apply merge_sorted. by apply leS_total.
+  apply sort_sorted. by apply leS_total. apply sort_sorted. 
   by apply leS_total.
-  apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+  apply sorted_undup. by apply leS_trans. apply merge_sorted. 
   by apply leS_total.
-  apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+  apply sort_sorted. by apply leS_total. done. apply uniq_perm.
   by apply undup_uniq. by apply undup_uniq. move => u.
   rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
   rewrite mem_seq2 mem_undup mem_merge mem_cat !mem_sort !mem_seq1.
@@ -1893,14 +1889,14 @@ case_eq (compare r1 r2) => heq.
   rewrite (eqP heq2). by rewrite compare_refl.
   rewrite andbT. by rewrite /cregexp_le /leS /cmpS /= heq.
   by rewrite hw1. by rewrite andbT.
-- rewrite mkAnd_unfold => //. f_equal. apply (@eq_sorted _ cregexp_le).
+- rewrite mkAnd_unfold => //. f_equal. apply (@sorted_eq _ cregexp_le).
   by apply leS_trans. by apply leS_antisym. apply sorted_undup.
-  by apply leS_trans. apply sorted_merge. by apply leS_total.
-  apply sorted_sort. by apply leS_total. apply sorted_sort. 
+  by apply leS_trans. apply merge_sorted. by apply leS_total.
+  apply sort_sorted. by apply leS_total. apply sort_sorted. 
   by apply leS_total.
-  apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+  apply sorted_undup. by apply leS_trans. apply merge_sorted. 
   by apply leS_total.
-  apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+  apply sort_sorted. by apply leS_total. done. apply uniq_perm.
   by apply undup_uniq. by apply undup_uniq. move => u.
   rewrite !mem_undup !mem_merge !mem_cat !mem_sort.
   rewrite mem_seq2 mem_undup mem_merge mem_cat !mem_sort !mem_seq1.
@@ -1913,13 +1909,13 @@ case_eq (compare r1 r2) => heq.
 move: hw3. rewrite !wf_re_CAnd. case/and4P => h3 h4 h5. move/allP => h6.
 apply/and4P; split.
 apply (@leq_trans (size l3)). done.
-rewrite (@perm_eq_size _ (undup (merge' [::r1] (sort' l3)))
+rewrite (@perm_size _ (undup (merge' [::r1] (sort' l3)))
         (undup ([::r1]++l3))).
 rewrite -{1}(@undup_id _ l3). by apply tool_undup_size. done.
-apply uniq_perm_eq. by apply undup_uniq. by apply undup_uniq. move => u.
+apply uniq_perm. by apply undup_uniq. by apply undup_uniq. move => u.
 by rewrite !mem_undup mem_merge !mem_cat mem_sort !mem_seq1.
 by apply undup_uniq. apply sorted_undup. by apply leS_trans.
-apply sorted_merge. by apply leS_total. done. apply sorted_sort.
+apply merge_sorted. by apply leS_total. done. apply sort_sorted.
 by apply leS_total. apply/allP => x. 
 rewrite mem_undup mem_merge mem_cat mem_sort mem_seq1.
 case/orP => hu. by rewrite (eqP hu).  by apply : h6.
@@ -1937,13 +1933,13 @@ case_eq (compare r1 r2) => heq1 //.
 - case_eq (compare r1 r3) => heq2.
   + by rewrite -(compare_eq_axiom heq1) -(compare_eq_axiom heq2).
   + rewrite toolmkPlus3 ?mkPlus_unfold2 ?heq2 => //. f_equal.
-    apply (@eq_sorted _ cregexp_le). by apply leS_trans. 
+    apply (@sorted_eq _ cregexp_le). by apply leS_trans. 
     by apply leS_antisym.
     simpl. by rewrite andbT /cregexp_le /leS /cmpS /= heq2.
-    apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done.
-    apply uniq_perm_eq. simpl. rewrite andbT. apply/negP. 
+    apply sort_sorted. by apply leS_total. done.
+    apply uniq_perm. simpl. rewrite andbT. apply/negP. 
     rewrite mem_seq1 => h. move : heq2.
     by rewrite (eqP h) compare_refl. by apply undup_uniq. move => u.  
     rewrite mem_undup mem_merge mem_cat mem_sort !mem_seq2 mem_seq1.
@@ -1954,13 +1950,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /= heq2. 
     by rewrite hw1 hw3.
   + rewrite toolmkPlus3 ?mkPlus_unfold2 ?heq2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. simpl. 
     by rewrite andbT /cregexp_le /leS /cmpS /= compare_neg heq2.
     apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply uniq_perm_eq. simpl. rewrite andbT. apply/negP. 
+    done. apply uniq_perm. simpl. rewrite andbT. apply/negP. 
     rewrite mem_seq1 => h. move : heq2.
     by rewrite (eqP h) compare_refl. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
@@ -1972,13 +1968,13 @@ case_eq (compare r1 r2) => heq1 //.
     by rewrite hw1 hw3.
 - case_eq (compare r1 r3) => heq2 //.
   + rewrite mkPlus_unfold2 ?toolmkPlus3 => //. rewrite heq1. f_equal.
-    apply (@eq_sorted _ cregexp_le). by apply leS_trans. 
+    apply (@sorted_eq _ cregexp_le). by apply leS_trans. 
     by apply leS_antisym.
-    apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. simpl. rewrite andbT. 
+    apply sort_sorted. by apply leS_total. done. simpl. rewrite andbT. 
     by rewrite /cregexp_le /leS /cmpS /= heq1.
-    apply uniq_perm_eq. by apply undup_uniq. simpl. rewrite andbT. 
+    apply uniq_perm. by apply undup_uniq. simpl. rewrite andbT. 
     apply/negP. rewrite mem_seq1 => h. move : heq1.
     by rewrite (eqP h) compare_refl. move => u.  
     rewrite mem_undup mem_merge mem_cat mem_sort !mem_seq2 mem_seq1.
@@ -1989,13 +1985,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /= heq1. 
     by rewrite hw1 hw2.
   + rewrite !mkPlus_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite orbAC. 
@@ -2010,13 +2006,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /= heq1. 
    by rewrite hw1 hw2.
   + rewrite !mkPlus_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite orbC orbA.
@@ -2032,13 +2028,13 @@ case_eq (compare r1 r2) => heq1 //.
     by rewrite hw1 hw2.
 - case_eq (compare r1 r3) => heq2 //.
   + rewrite mkPlus_unfold2 ?toolmkPlus3 => //. rewrite heq1. f_equal.
-    apply (@eq_sorted _ cregexp_le). by apply leS_trans. 
+    apply (@sorted_eq _ cregexp_le). by apply leS_trans. 
     by apply leS_antisym.
-    apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. simpl. rewrite andbT. 
+    apply sort_sorted. by apply leS_total. done. simpl. rewrite andbT. 
     by rewrite /cregexp_le /leS /cmpS /= compare_neg heq1.
-    apply uniq_perm_eq. by apply undup_uniq. simpl. rewrite andbT. 
+    apply uniq_perm. by apply undup_uniq. simpl. rewrite andbT. 
     apply/negP. rewrite mem_seq1 => h. move : heq1.
     by rewrite (eqP h) compare_refl. move => u.  
     rewrite mem_undup mem_merge mem_cat mem_sort !mem_seq2 mem_seq1.
@@ -2049,13 +2045,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /= compare_neg heq1. 
     by rewrite hw2 hw1.
   + rewrite !mkPlus_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite -orbA orbC.
@@ -2070,13 +2066,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /= compare_neg heq1. 
     by rewrite hw2 hw1.
   + rewrite !mkPlus_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite orbC orbAC orbA.
@@ -2092,7 +2088,6 @@ case_eq (compare r1 r2) => heq1 //.
     by rewrite hw2 hw1.
 Qed.
 
-
 Lemma mkAndAC_nand_nand_nand : forall r1 r2 r3, wf_re r1 -> wf_re r2 -> wf_re r3 ->
  [/\ r1 != CVoid , r1 != CNot CVoid & (forall l, r1 != CAnd l)] ->
  [/\ r2 != CVoid , r2 != CNot CVoid & (forall l, r2 != CAnd l)] ->
@@ -2105,13 +2100,13 @@ case_eq (compare r1 r2) => heq1 //.
 - case_eq (compare r1 r3) => heq2.
   + by rewrite -(compare_eq_axiom heq1) -(compare_eq_axiom heq2).
   + rewrite toolmkAnd3 ?mkAnd_unfold2 ?heq2 => //. f_equal.
-    apply (@eq_sorted _ cregexp_le). by apply leS_trans. 
+    apply (@sorted_eq _ cregexp_le). by apply leS_trans. 
     by apply leS_antisym.
     simpl. by rewrite andbT /cregexp_le /leS /cmpS /=  heq2.
-    apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. simpl.
-    apply uniq_perm_eq. simpl. rewrite andbT. apply/negP. 
+    apply sort_sorted. by apply leS_total. done. simpl.
+    apply uniq_perm. simpl. rewrite andbT. apply/negP. 
     rewrite mem_seq1 => h. move : heq2.
     by rewrite (eqP h) compare_refl. by apply undup_uniq. move => u.  
     rewrite mem_undup mem_merge mem_cat mem_sort !mem_seq2 mem_seq1.
@@ -2122,13 +2117,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /=  heq2. 
     by rewrite hw1 hw3.
   + rewrite toolmkAnd3 ?mkAnd_unfold2 ?heq2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. simpl.
     by rewrite andbT /cregexp_le /leS /cmpS /=  compare_neg heq2.
     apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply uniq_perm_eq. simpl. rewrite andbT. apply/negP. 
+    done. apply uniq_perm. simpl. rewrite andbT. apply/negP. 
     rewrite mem_seq1 => h. move : heq2.
     by rewrite (eqP h) compare_refl. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
@@ -2140,13 +2135,13 @@ case_eq (compare r1 r2) => heq1 //.
     by rewrite hw1 hw3.
 - case_eq (compare r1 r3) => heq2 //.
   + rewrite mkAnd_unfold2 ?toolmkAnd3 => //. rewrite heq1. f_equal.
-    apply (@eq_sorted _ cregexp_le). by apply leS_trans. 
+    apply (@sorted_eq _ cregexp_le). by apply leS_trans. 
     by apply leS_antisym.
-    apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. simpl. rewrite andbT. 
+    apply sort_sorted. by apply leS_total. done. simpl. rewrite andbT. 
     by rewrite /cregexp_le /leS /cmpS /=  heq1.
-    apply uniq_perm_eq. by apply undup_uniq. simpl. rewrite andbT. 
+    apply uniq_perm. by apply undup_uniq. simpl. rewrite andbT. 
     apply/negP. rewrite mem_seq1 => h. move : heq1.
     by rewrite (eqP h) compare_refl. move => u.  
     rewrite mem_undup mem_merge mem_cat mem_sort !mem_seq2 mem_seq1.
@@ -2157,13 +2152,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /=  heq1. 
     by rewrite hw1 hw2.
   + rewrite !mkAnd_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite orbAC. 
@@ -2178,13 +2173,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /= heq1.
     by rewrite hw1 hw2.
   + rewrite !mkAnd_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite orbC orbA.
@@ -2200,13 +2195,13 @@ case_eq (compare r1 r2) => heq1 //.
     by rewrite hw1 hw2.
 - case_eq (compare r1 r3) => heq2 //.
   + rewrite mkAnd_unfold2 ?toolmkAnd3 => //. rewrite heq1. f_equal.
-    apply (@eq_sorted _ cregexp_le). by apply leS_trans. 
+    apply (@sorted_eq _ cregexp_le). by apply leS_trans. 
     by apply leS_antisym.
-    apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. simpl. rewrite andbT. 
+    apply sort_sorted. by apply leS_total. done. simpl. rewrite andbT. 
     by rewrite /cregexp_le /leS /cmpS /=  compare_neg heq1.
-    apply uniq_perm_eq. by apply undup_uniq. simpl. rewrite andbT. 
+    apply uniq_perm. by apply undup_uniq. simpl. rewrite andbT. 
     apply/negP. rewrite mem_seq1 => h. move : heq1.
     by rewrite (eqP h) compare_refl. move => u.  
     rewrite mem_undup mem_merge mem_cat mem_sort !mem_seq2 mem_seq1.
@@ -2217,13 +2212,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /=  compare_neg heq1.
     by rewrite hw1 hw2.
   + rewrite !mkAnd_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite -orbA orbC.
@@ -2238,13 +2233,13 @@ case_eq (compare r1 r2) => heq1 //.
     rewrite andbT. by rewrite /cregexp_le /leS /cmpS /=  compare_neg heq1.
     by rewrite hw1 hw2.
   + rewrite !mkAnd_unfold2 => //. f_equal.
-    apply : (@eq_sorted _ cregexp_le). by apply leS_trans.
+    apply : (@sorted_eq _ cregexp_le). by apply leS_trans.
     by apply leS_antisym. apply sorted_undup. by apply leS_trans.
-    apply sorted_merge. by apply leS_total. apply sorted_sort. 
+    apply merge_sorted. by apply leS_total. apply sort_sorted. 
     by apply leS_total.
-    done. apply sorted_undup. by apply leS_trans. apply sorted_merge. 
+    done. apply sorted_undup. by apply leS_trans. apply merge_sorted. 
     by apply leS_total.
-    apply sorted_sort. by apply leS_total. done. apply uniq_perm_eq.
+    apply sort_sorted. by apply leS_total. done. apply uniq_perm.
     by apply undup_uniq. by apply undup_uniq. move => u. 
     rewrite !mem_undup !mem_merge !mem_cat !mem_sort !mem_seq2 !mem_seq1.
     by rewrite orbC orbAC orbA.
@@ -2363,7 +2358,6 @@ move => r1 r2 r3 h1 h2 h3.
 rewrite mkAndAC => //. rewrite (mkAndC r1 r3).
 rewrite -mkAndAC => //. by rewrite (mkAndC r3 r2) mkAndC.
 Qed.
-
 
 Lemma mkConcA : forall r1 r2 r3, mkConc (mkConc r1 r2) r3 = mkConc r1 (mkConc r2 r3).
 Proof.
@@ -2571,6 +2565,3 @@ Definition sim2_bregexp_sub :=
   ssim2_Plus_id  ssim2_PlusC  ssim2_PlusA 
   ssim2_congr_Conc  ssim2_congr_Plus  ssim2_congr_And 
   ssim2_congr_Star  ssim2_congr_Not.
-
-
- 
