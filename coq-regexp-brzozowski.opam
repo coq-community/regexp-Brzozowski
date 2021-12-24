@@ -19,8 +19,9 @@ Components library."""
 build: [make "-j%{jobs}%"]
 install: [make "install"]
 depends: [
-  "coq" {(>= "8.10" & < "8.15~") | (= "dev")}
+  "coq" {(>= "8.10" & < "8.16~") | (= "dev")}
   "coq-mathcomp-ssreflect" {(>= "1.12.0" & < "1.14~") | (= "dev")}
+  "coq-reglang" {= "dev"}
 ]
 
 tags: [

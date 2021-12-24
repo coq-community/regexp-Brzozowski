@@ -41,7 +41,7 @@ license:
 
 supported_coq_versions:
   text: 8.10 or later
-  opam: '{(>= "8.10" & < "8.15~") | (= "dev")}'
+  opam: '{(>= "8.10" & < "8.16~") | (= "dev")}'
 
 dependencies:
 - opam:
@@ -49,6 +49,11 @@ dependencies:
     version: '{(>= "1.12.0" & < "1.14~") | (= "dev")}'
   description: |-
     [MathComp](https://math-comp.github.io) 1.12.0 or later (`ssreflect` suffices)
+- opam:
+    name: coq-reglang
+    version: '{= "dev"}'
+  description: |-
+    [RegLang](https://github.com/coq-community/reglang) development version
 
 tested_coq_opam_versions:
 - version: 'coq-dev'
@@ -63,6 +68,8 @@ tested_coq_opam_versions:
   repo: 'mathcomp/mathcomp'
 - version: '1.12.0-coq-8.10'
   repo: 'mathcomp/mathcomp'
+
+ci_extra_dev: true
 
 namespace: RegexpBrzozowski
 

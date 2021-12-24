@@ -2,7 +2,8 @@
 From Coq Require Import RelationClasses Setoid Morphisms.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
 From mathcomp Require Import bigop path.
-Require Import glue regexp finite_der equiv.
+From RegLang Require Import languages.
+From RegexpBrzozowski Require Import glue regexp finite_der equiv.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
@@ -177,11 +178,14 @@ apply creg_ind with (fun l =>
 + move => l [ hl _ ] /= ; move : hl. rewrite /hec_forall ; move => ->.
   rewrite  -topredE /= /mem_creg /=.  elim: l => [ | hd tl hi] //=. apply/andP/concP. 
   * case => hhd hall. exists [::] => //.
-    exists [::] => //.  by rewrite -topredE /= /mem_creg /= -hi.
-  * case => [v1 hv1 [v2 hv2 ]]. case: v1 hv1 => //= hv1 heq.
+    exists [::]; split => //=; split => //=.
+    by rewrite -topredE /= /mem_creg /= -hi.
+  * case => [v1 [v2 [hv [hv1 hv2]]]].
+    move: hv.
+    case: v1 hv1 => //= hv1 heq.
     by rewrite hv1 hi heq.
 + by move => c h /= ; rewrite h.
-+ done.
++ by [].
 + move => c hc l [hl1 hl2] /=; split.
   - by congr andb. 
   - by congr orb.
@@ -445,21 +449,24 @@ elim => [ | hd tl ih] l2 u /=;
   *  move: hv1. rewrite -!topredE /= /mem_creg /= /eps /=.
      move => h1 h2 -> ; by rewrite (eqP h1) (eqP h2).
   *  move:hv1; rewrite -topredE /= /mem_creg /=.
-     rewrite /eps /=; move=> h. move/concP => [w1 hw1 [ w2 hw2 ->]] ->.
-     rewrite (eqP h). apply/concP. exists w1 => //. exists w2 => //.
+     rewrite /eps /=; move=> h.
+     move/concP => [w1 [w2 [hw [hw1 hw2]]]] ->.
+     rewrite (eqP h). apply/concP. by exists w1, w2.
 - apply: (iffP (@concP symbol _ _ _)).
-  * case => [v1 hv1 [v2 hv2 -> ]]. case: (ih l2 v2 hv2) => v2' hv2' [v3 hv3] -> .
+  * case => [v1 [v2 [hv [hv1 hv2]]]]. case: (ih l2 v2 hv2) => v2' hv2' [v3 hv3].
     exists (v1 ++ v2'). rewrite -topredE /= /mem_creg /=.
-    apply/concP. exists v1 => //. by exists v2'. exists v3 => //.
-    by rewrite catA.
+    apply/concP; first by exists v1, v2'. 
+    by exists v3 => //; rewrite hv q catA.
   * case => [v1]. rewrite -topredE /= /mem_creg /=.
-    move/concP => [w1 hw1 [ w2 hw2 ->]]. case => [v2 hv2 ->].
-    exists w1 => //. exists (w2++v2). apply/ih.
-    exists w2 => //. by exists v2. by rewrite catA.
+    move/concP => [w1 [w2 [hw [hw1 hw2]]]]. case => [v2 hv2 ->].
+    exists w1 => //. exists (w2++v2) => //. 
+    split; first by rewrite hw catA.
+    split => //; apply/ih.
+    by exists w2 => //; exists v2.
 Qed.
 
 Lemma toolmkConc : forall r, [ \/ r == CVoid , r == CEps , (exists l, r == CConc l) |
-     [ /\ r != CVoid , r != CEps & (forall l, r != CConc l) ] ].
+ [ /\ r != CVoid , r != CEps & (forall l, r != CConc l) ] ].
 Proof.
 case => [ | | | s | c | l | l | l | c ] //=; try by apply: Or44.
 - by apply: Or41.
@@ -528,29 +535,37 @@ Proof.
 by case.
 Qed.
 
-(* Proof that the smart constructor has the same behaviour than the usual constructor *)
+(* Proof that the smart constructor has the same behaviour as the usual constructor *)
 Lemma mem_mkConc : forall r1 r2, (mkConc r1 r2) =i (CConc [:: r1 ; r2]).
 Proof.
 move => r1. case: (toolmkConc r1).
 - move => heq; rewrite (eqP heq) => r2 u; clear r1 heq.
-  rewrite -!topredE /= /mem_creg /=. apply/idP/concP.
-  by case: r2 => /=. by case.
+  rewrite -!topredE /= /mem_creg /=. 
+  apply/idP/concP; first by case: r2 => //=. 
+  by case => w1; case => w2 [w [hw1 hw2]].
 - move => heq; rewrite (eqP heq) /= => r2 u; clear r1 heq.
   rewrite -!topredE /= /mem_creg /=. apply/idP/concP.
-  move => h; exists nil => //. exists u => //=.
+  move => h; exists nil => //. exists u => //=. split => //; split => //.
   apply/concP. by exists u => //; exists nil => //; rewrite cats0.
-  case => vnil /=. case: vnil => //= _. case => v.
-  case/concP => w hw. case. case => //= _. by rewrite cats0 => -> ->.
+  case => vnil /=. case => v [hu [hep hv]]. case: vnil hep hu => //= _.
+  move: hv; case/concP => w [w0 [hw [hu hw0]]]. 
+  case: w0 hw0 hw => //= _. by rewrite cats0 => -> ->.
 - case => l heq; rewrite (eqP heq) => r2 u; clear r1 heq. case: (toolmkConc r2).
   * move => heq; rewrite (eqP heq); clear r2 heq.
     rewrite -!topredE /= /mem_creg /=. apply/idP/concP => //.
-    case => v h1. case => w. by case/concP.
+    case => v; case => w [hu [hw1 hw2]]. 
+    move: hw2 hu.
+    by case/concP => x; case => x0 [hw [hx hx0]].
   * move => heq; rewrite (eqP heq) /=; clear r2 heq.
     rewrite -!topredE /= /mem_creg /=. apply/idP/concP.
-    move => h; exists u => //. exists nil => /=. apply/concP.
-    exists nil => //. by exists nil => //. by rewrite cats0.
-    case => v hv /=. case => vnil. move/concP. case => [ [|] ] //= _. case => [[|]] //= _ -> .
-    by rewrite cats0 => ->.
+    move => h; exists u => //. exists nil. split; first by rewrite cats0.
+    split => //. apply/concP.
+    exists nil => //. by exists nil => //.
+    case => v; case => vnil [hu [hv hc]].
+    move: hc hu. move/concP.
+    case => w; case => [w0 [hww0 [hw hw0]]].
+    case: w hw hww0 => // _.
+    by case: w0 hw0 => //= _ ->->; rewrite cats0.
   * case => l' heq; rewrite (eqP heq) /=; clear r2 heq.
     change [:: CConc l; CConc l'] with ([:: CConc l] ++ [:: CConc l']).
     apply/CConcP/CConcP. case => v1 hv1 [v2 hv2 ->]. exists v1.
@@ -559,30 +574,53 @@ move => r1. case: (toolmkConc r1).
     rewrite -topredE /= /mem_creg /=. apply/concP. exists v2 => //.
     by exists nil => //; rewrite cats0.
     case => v1 hv1 [v2 hv2 ->]. exists v1. move: hv1. rewrite -!topredE /= /mem_creg /=.
-    case/concP => v hv. case => [[|]] //= _. by rewrite cats0 => ->. move: hv2.
-    rewrite -!topredE /= /mem_creg /=. case/concP => v hv. case => [[|]] //= _.
+    case/concP => v. 
+    case => w [hvw [hv hw]].
+    case: w hw hvw => // _.
+    by rewrite cats0 => ->. move: hv2.
+    rewrite -!topredE /= /mem_creg /=. case/concP => v; case => w [hvw [hv hw]]. 
+    case: w hw hvw => // _.
     rewrite cats0 => ->. by exists v.
   * move => h; rewrite mkConc_unfold => //=. change [:: CConc l; r2] with ([:: CConc l]++[::r2]).
     apply/CConcP/CConcP. case => v hv [w hw ->]. exists v. rewrite -topredE /= /mem_creg /=.
     apply/concP. exists v => //. exists nil => //; by rewrite cats0. by exists w.
-    case => v hv [w hw -> ]. rewrite -topredE /= /mem_creg /= in hv. case/concP : hv => v' hv' [[|]] //= _.
-    rewrite cats0 => ->. exists v' => //=. by exists w => //=.
+    case => v hv [w hw -> ]. rewrite -topredE /= /mem_creg /= in hv.
+    case/concP: hv => v'; case => w' [hv'w' [hv' hw']].
+    case: w' hv'w' hw' => //.
+    rewrite cats0 =>-> _.
+    by exists v' => //=; exists w.
 - move => h0 r2 u. case: (toolmkConc r2).
   * move => heq; rewrite (eqP heq) mkConc_CVoid_rt; clear r2 heq.
     rewrite -!topredE /= /mem_creg /=. apply/idP/concP => //.
-    case => v h1. case => w. by case/concP.
+    case => v. case => w [hvw [hv hw]]. case/concP: hw.
+    by move => w0; case => w1 [hw0w1 [hw0 hw1]].
   * move => heq; rewrite (eqP heq) mkConc_CEps_rt ; clear r2 heq.
     rewrite -!topredE /= /mem_creg /=. apply/idP/concP.
-    move => h; exists u => //. exists nil => /=. apply/concP.
-    exists nil => //. by exists nil => //. by rewrite cats0.
-    case => v hv /=. case => vnil. move/concP. case => [ [|] ] //= _. case => [[|]] //= _ -> .
-    by rewrite cats0 => ->.
+    move => h; exists u => //. exists nil => /=.
+    split; first by rewrite cats0.
+    split => //.
+    apply/concP.
+    exists nil => //. by exists nil => //.
+    case => v; case => vnil [huv [hv hvnil]].
+    move/concP: hvnil; case => w0; case => w1 [hw0w1 [hw0 hw1]].
+    case: w0 hw0 hw0w1 => // _.
+    case: w1 hw1 => // _.
+    move: huv.
+    rewrite cats0=>->->.
+    by rewrite cats0.
   * case => l' heq; rewrite (eqP heq) mkConc_unfold2 //=; clear r2 heq.
     rewrite -!topredE /= /mem_creg /=. apply/concP/concP. 
-    case => v hv [w hw ->]. exists v => //. exists w => //. apply/concP.
+    case => v; case => w [hvw [hv hw]].
+    exists v => //. exists w => //. 
+    split => //; split => //.
+    apply/concP.
     exists w => //. by exists nil => //;  rewrite cats0.
-    case => v hv [w]. case/concP => w' hw' [[|] //= _ ]. rewrite cats0 => -> ->. 
-    exists v => //. by exists w'.
+    case => v; case => w [hvw [hv hw]].
+    case/concP: hw => w'; case => w0 [hw'w0 [hw' hw0]].
+    case: w0 hw'w0 hw0 => // heq _.
+    move: heq hvw hw'.
+    rewrite cats0 =><- hw'.
+    by exists v => //; exists w.
   * move => h1. by rewrite mkConc_unfold3 => //.
 Qed.
 
@@ -1131,17 +1169,26 @@ elim => [ | | | s | c1 hc1 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 
   apply/allP => x hx; case/andP : (h1 x hx) => hh1 hh2;
   rewrite !inE hh1 /=; [ rewrite -hc1 | rewrite hc1]. 
 - rewrite mem_mkPlus. rewrite -!topredE /= /mem_creg /=. apply/orP/orP.
-  * move => [h1 | h2]; [left | right ]; rewrite !inE. by rewrite -hc1. by rewrite orbF -hc2.
-  * move => [h1 | h2 ]; [left | right]; rewrite !inE. by rewrite hc1.
+  * move => [h1 | h2]; [left | right ]. by rewrite -hc1. by rewrite inE orbF -hc2.
+  * move => [h1 | h2 ]; [left | right]; first by rewrite hc1.
     move/orP : h2 => [h1 | h2] //. by rewrite hc2.
 - rewrite mem_mkAnd. rewrite -!topredE /= /mem_creg /=. apply/andP/andP; rewrite !inE => [[h1 h2]].
   * by rewrite -hc1 -hc2 h1 h2 andbT.
   * move/andP: h2 => [h2 h3]. by rewrite hc1 h1 hc2 h2.
 - rewrite mem_mkConc. rewrite -!topredE /= /mem_creg /=. apply/concP/concP.
-  * case => v1 hv1 [v2 hv2 heq]. exists v1. rewrite -hc1 hv1 //. exists v2 => //.
-    apply/concP. exists v2. by rewrite -hc2.  by exists nil => //; rewrite cats0.
-  * case => v1 hv1 [v2]. case/concP => v2' hv2' [ [|] //= _ ->] ->. 
-    exists v1. rewrite hc1 hv1 //. exists v2' => //. by rewrite hc2. by rewrite cats0.
+  * case => v1; case => v2 [heq [hv2 hv1]].
+    exists v1, v2. split => //. split; first by rewrite -hc1.
+    apply/concP. exists v2, nil.
+    split; first by rewrite cats0.
+    by rewrite -hc2.
+  * case => v1; case => v2 [heq [hv1 hv2]].
+    case/concP: hv2 => v2'; case => v3 [hv2'v3 [hv2' hv3]].
+    case: v3 hv2'v3 hv3 => //.
+    rewrite cats0 => hv2'v3 _.
+    exists v1, v2'.
+    rewrite -hv2'v3; split => //.
+    split; first by rewrite hc1.
+    by rewrite hc2 hv2'v3.
 - rewrite mem_mkNot. rewrite -!topredE /= /mem_creg /=. congr negb.
   by rewrite topredE  hc1.
 Qed.

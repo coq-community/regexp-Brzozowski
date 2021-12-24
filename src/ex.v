@@ -1,16 +1,14 @@
 (* begin hide *)
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
 From mathcomp Require Import bigop path.
+From RegexpBrzozowski Require Import glue gfinset regexp finite_der equiv.
+From RegexpBrzozowski Require Import sim1 sim2.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
-Import Prenex Implicits. 
-
-Require Import glue gfinset regexp finite_der equiv.
-Require Import sim1 sim2.
+Import Prenex Implicits.
 (* end hide *)
 (** Some computation tests *)
-
 
 Definition V : bregexp := (@Void _).
 Definition E : bregexp := (@Eps _).

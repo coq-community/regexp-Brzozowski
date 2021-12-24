@@ -2,12 +2,12 @@
 From Coq Require Import RelationClasses Setoid Morphisms Permutation.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
 From mathcomp Require Import bigop path.
+From RegLang Require Import languages.
+From RegexpBrzozowski Require Import regexp finite_der equiv.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
-Import Prenex Implicits. 
-
-Require Import regexp finite_der equiv.
+Import Prenex Implicits.
 (* end hide *)
 
 (** "Naïve" implementation of similarity
@@ -723,11 +723,10 @@ elim => //.
 move => r1 hr1 r2 hr2. rewrite ssublPlus1 //.
 case/orP => hu x.
 - rewrite -!topredE /= => hx.
-  apply/orP; left. by rewrite inE; apply: hr1.
+  apply/orP; left. by apply: hr1.
 rewrite -!topredE /= => hx.
-apply/orP; right. by rewrite inE; apply: hr2.
+apply/orP; right. by apply: hr2.
 Qed.
-
 
 Lemma ssubrEps_ok : forall b, ssubr (Eps symbol) b ->
   forall x, (x \in b) -> (x \in (Eps symbol) ).
@@ -747,13 +746,13 @@ elim => //.
 move => r1 hr1 r2 hr2. rewrite ssublPlus1 //.
 case/orP => hu x.
 - rewrite -!topredE /= => hx.
-  apply/orP; left. by rewrite inE; apply: hr1.
+  apply/orP; left. by apply: hr1.
 rewrite -!topredE /= => hx.
-apply/orP; right. by rewrite inE; apply: hr2.
+apply/orP; right. by apply: hr2.
 Qed.
 
 Lemma ssubrDot_ok : forall b, ssubr (Dot symbol) b ->
-  forall x, (x \in b) -> (x \in (Dot symbol) ).
+  forall x, (x \in b) -> (x \in (Dot symbol)).
 Proof.
 elim => //.
 move => r1 hr1 r2 hr2. rewrite ssubrPlus2. 
@@ -771,9 +770,9 @@ move => s; elim => //.
 move => r1 hr1 r2 hr2. rewrite ssublPlus1 //.
 case/orP => hu x.
 - rewrite -!topredE /= => hx.
-  apply/orP; left. by rewrite inE; apply: hr1.
+  apply/orP; left. by apply: hr1.
 rewrite -!topredE /= => hx.
-apply/orP; right. by rewrite inE; apply: hr2.
+apply/orP; right. by apply: hr2.
 Qed.
 
 Lemma ssubrAtom_ok : forall s b, ssubr (Atom s) b ->
@@ -787,7 +786,6 @@ rewrite -!topredE /=; case/orP => hu.
 - move: (hr1 h1 x hu). by rewrite -topredE /=.
 move: (hr2 h2 x hu). by rewrite -topredE /=.
 Qed.
-
 
 Lemma ssublStar_ok : forall a, 
   (forall b, ssubl a b -> forall x, x \in a -> x \in b) ->
@@ -806,8 +804,8 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
   by rewrite inE (ha d h y).
 by rewrite ssublPlus1 => //;
   case/orP => hu x hx;  rewrite -topredE /=; 
-   apply/orP; [left; rewrite inE (hd1 hu x hx) | 
-              right; rewrite inE (hd2 hu x hx)].
+   apply/orP; [left; rewrite (hd1 hu x hx) | 
+              right; rewrite (hd2 hu x hx)].
 Qed.
 
 Lemma ssubrStar_ok : forall a, 
@@ -841,8 +839,8 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
   d1 _ d2 _ | d1 _ d2 _ | d _ ] //.
 - by rewrite ssublPlus1 => //;
        case/orP => hu x hx;  rewrite -topredE /=; 
-       apply/orP; [left; rewrite inE (hd1 hu x hx) | 
-                   right; rewrite inE (hd2 hu x hx)].
+       apply/orP; [left; rewrite (hd1 hu x hx) | 
+                   right; rewrite (hd2 hu x hx)].
 rewrite ssublNot => h x. rewrite -topredE /= /compl /=; move/negP=> h1.
 rewrite -topredE /= /compl /=. apply/negP => hn.
 apply: h1.
@@ -911,11 +909,11 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
   d1 _ d2 _ | d1 _ d2 _ | d _ ] //.
 - by rewrite ssublPlus1 => //;
     case/orP => hu x hx;  rewrite -topredE /=; 
-     apply/orP; [left; rewrite inE (hd1 hu x hx) | 
-                right; rewrite inE (hd2 hu x hx)].
+     apply/orP; [left; rewrite (hd1 hu x hx) | 
+                right; rewrite (hd2 hu x hx)].
 rewrite ssublAnd; case/andP => h1 h2 x. rewrite -!topredE /=. 
 case/andP => h3 h4. 
-apply/andP. rewrite !inE. by rewrite (ha d1 h1 x h3) (hc d2 h2 x h4).
+apply/andP. by rewrite (ha d1 h1 x h3) (hc d2 h2 x h4).
 Qed.
 
 Lemma ssubrAnd_ok : forall a c, 
@@ -933,7 +931,7 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
     [ by apply hd1 | by apply hd2].
 rewrite ssubrAnd; case/andP => h1 h2 x. rewrite -!topredE /=. 
 case/andP => h3 h4. 
-apply/andP. rewrite !inE. by rewrite (ha d1 h1 x h3) (hc d2 h2 x h4).
+apply/andP. by rewrite (ha d1 h1 x h3) (hc d2 h2 x h4).
 Qed.
 
 Lemma ssublConc_ok : forall a c, 
@@ -947,16 +945,14 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
   d1 _ d2 _ | d1 _ d2 _ | d _ ] //.
 - by rewrite ssublPlus1 => //;
     case/orP => hu x hx;  rewrite -topredE /=; 
-     apply/orP; [left; rewrite inE (hd1 hu x hx) | 
-                right; rewrite inE (hd2 hu x hx)].
+     apply/orP; [left; rewrite (hd1 hu x hx) | 
+                right; rewrite (hd2 hu x hx)].
 rewrite ssublConc; case/andP => h1 h2 x. rewrite -!topredE /=. 
-case/concP => u hu [v hv huv]. 
+case/concP => u [v [hv [hu huv]]].
 apply/concP; exists u.  
-+ by rewrite (ha d1 h1 u hu).
-exists v => //.
-by rewrite (hc d2 h2 v hv). 
+exists v; split => //; split; first by rewrite (ha d1 h1 u hu).
+by rewrite (hc d2 h2 v huv).
 Qed.
-
 
 Lemma ssubrConc_ok : forall a c, 
   (forall b, ssubr a b -> forall x, x \in b -> x \in a) ->
@@ -972,13 +968,11 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
   rewrite -topredE /=; case/orP => hu; 
     [ by apply hd1 | by apply hd2].
 rewrite ssubrConc; case/andP => h1 h2 x. rewrite -!topredE /=. 
-case/concP => u hu [v hv huv]. 
-apply/concP; exists u.  
-+ by rewrite (ha d1 h1 u hu).
-exists v => //.
-by rewrite (hc d2 h2 v hv). 
+case/concP => u [v [hu [hv huv]]]. 
+apply/concP; exists u.
+exists v; split => //; split; first by rewrite (ha d1 h1 u hv).
+by rewrite (hc d2 h2 v huv).
 Qed.
-
 
 Lemma ssublr_ok : forall a b, 
  (ssubl a b -> {subset a <= b}) /\ (ssubr a b -> {subset b <= a}).
@@ -1106,4 +1100,3 @@ Definition sim1_bregexp_sub :=
   (@ssim1_Plus_id _) (@ssim1_PlusC _) (@ssim1_PlusA _)
   (@ssim1_congr_Conc _) (@ssim1_congr_Plus _) (@ssim1_congr_And _)
   (@ssim1_congr_Star _) (@ssim1_congr_Not [eqType of bool]).
-

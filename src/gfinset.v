@@ -1,8 +1,8 @@
 (* begin hide *)
-Require Import glue.
 From Coq Require Import RelationClasses Setoid Morphisms SetoidList Mergesort Permutation.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype.
 From mathcomp Require Import bigop path.
+From RegexpBrzozowski Require Import glue.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
