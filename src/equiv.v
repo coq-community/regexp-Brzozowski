@@ -2,12 +2,13 @@
 From Coq Require Import RelationClasses.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
 From mathcomp Require Import bigop path.
+From RegLang Require Import languages.
+From RegexpBrzozowski Require Import glue gfinset regexp finite_der.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
 Import Prenex Implicits. 
 
-Require Import glue gfinset regexp finite_der.
 (* end hide *)
 
 (** From now on, we consider the alphabet to be {0, 1}, but the
@@ -178,8 +179,8 @@ Lemma in_der_compat : forall (r1 r2:bregexp) , r1 ≡ r2 ->
   forall a,(der a r1) ≡ (der a r2). 
 Proof.
 move => r1 r2 heq a u.
-by rewrite !derE !residualE !heq.
-Qed. 
+by rewrite !derE !in_residual !heq.
+Qed.
 
 Lemma in_wder_compat : forall (r1 r2:bregexp), r1 ≡ r2 -> forall s,
   (wder s r1) ≡ (wder s r2).

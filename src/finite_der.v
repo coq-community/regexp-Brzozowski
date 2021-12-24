@@ -3,14 +3,12 @@ From Coq Require Import RelationClasses Setoid Morphisms Permutation.
 From Coq Require Import SetoidList Mergesort Orders.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
 From mathcomp Require Import bigop path.
+From RegLang Require Import languages.
+From RegexpBrzozowski Require Import glue gfinset regexp.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
 Import Prenex Implicits. 
-
-Require Import glue.
-Require Import gfinset.
-Require Import regexp.
 
 (* end hide *)
 
@@ -37,7 +35,6 @@ Variable similar_Plus_id : forall c, similar (Plus c c) c.
 Variable similar_PlusC : forall c1 c2, similar (Plus c1 c2) (Plus c2 c1).
 Variable similar_PlusA : forall c1 c2 c3, 
  similar (Plus (Plus c1 c2) c3) (Plus c1 (Plus c2 c3)).
-
 
 Variable similar_congr_Conc : forall a b c d, similar a b -> similar c d ->
  similar (Conc a c) (Conc b d).
