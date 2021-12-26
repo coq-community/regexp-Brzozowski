@@ -26,9 +26,10 @@ Follow the instructions on https://github.com/coq-community/templates to regener
 [doi-shield]: https://zenodo.org/badge/DOI/10.1007/978-3-642-25379-9_11.svg
 [doi-link]: https://doi.org/10.1007/978-3-642-25379-9_11
 
-Coq library that formalizes a decision procedure for regular
-expression equivalence in type theory, using the Mathematical
-Components library.
+Coq library that formalizes decision procedures for regular
+expression equivalence, using the Mathematical Components
+library. The formalization builds on Brzozowski's derivatives
+of regular expressions for correctness.
 
 ## Meta
 

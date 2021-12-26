@@ -1,0 +1,5 @@
+(coq.theory
+ (name RegexpBrzozowski)
+ (package coq-regexp-brzozowski)
+ (synopsis "Decision procedures for regular expression equivalence in Coq using Mathematical Components")
+ (flags :standard -w -notation-overridden))
