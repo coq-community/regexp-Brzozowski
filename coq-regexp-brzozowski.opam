@@ -10,11 +10,12 @@ dev-repo: "git+https://github.com/coq-community/regexp-Brzozowski.git"
 bug-reports: "https://github.com/coq-community/regexp-Brzozowski/issues"
 license: "MIT"
 
-synopsis: "Regular expression equivalence in Coq using Mathematical Components"
+synopsis: "Decision procedures for regular expression equivalence in Coq using Mathematical Components"
 description: """
-Coq library that formalizes a decision procedure for regular
-expression equivalence in type theory, using the Mathematical
-Components library."""
+Coq library that formalizes decision procedures for regular
+expression equivalence, using the Mathematical Components
+library. The formalization builds on Brzozowski's derivatives
+of regular expressions for correctness."""
 
 build: [make "-j%{jobs}%"]
 install: [make "install"]
@@ -29,6 +30,7 @@ tags: [
   "category:Computer Science/Formal Languages Theory and Automata"
   "keyword:regular expressions"
   "keyword:decision procedure"
+  "keyword:relation algebra"
   "logpath:RegexpBrzozowski"
 ]
 authors: [
