@@ -26,8 +26,6 @@ Definition r_inter  (r1 r2: grel) : grel := fun x y => r1 x y /\ r2 x y.
 Definition r_union (r1 r2: grel) : grel :=
   fun x y =>  r1 x y \/ r2 x y.
 
-
-
 Definition Empty_gset :gset := fun _ => False.
 
 Definition Intersection (B C:gset) : gset :=
@@ -40,7 +38,6 @@ Lemma Empty_gset_inv : forall x, ~ Empty_gset x.
 Proof.
 by move => x; case.
 Qed.
-
 
 Fixpoint prodn (T:Type) (n:nat) : Type := match n with
  | O => unit
@@ -925,23 +922,20 @@ Variable ltA : grel A.
 Context `{StrictOrder A ltA}.
 
 Variable ltA_proper : Proper (eqA ==> eqA ==> iff) ltA.
-Definition Sorteds l := Sorted ltA (seq_to_list l).
+Definition Sorteds l := Sorted ltA l.
 
 Definition InA2 := SetoidList.InA eqA.
 
-Lemma InA2P : forall x l, reflect (InA2 x (seq_to_list l)) (InA l x).
+Lemma InA2P : forall x l, reflect (InA2 x l) (InA l x).
 Proof.
-move => x l; apply: (iffP idP).
-- elim :l => [ | hd tl hi]//=. case: (eqA_dec x hd) => heq /=.
-  move => _ .  apply SetoidList.InA_cons. by left. move => hIn. apply SetoidList.InA_cons.
-  by right; apply: hi.
-- remember (seq_to_list l) as L. move => hIn. move: l HeqL. elim: hIn => /=; clear L.
-  move => y l heq [ // | a l'] /=. case => hhd htl. case: (eqA_dec x a) => //=.
-  elim. by rewrite -hhd. move => y l hIn hi [ // | a l'] /=. case => hhd htl.
-  case: (eqA_dec x a) => //=. move => _ . by apply : hi.
+move => x l; apply: (iffP idP); last first.
+  by elim => y l0; rewrite /= /is_left; case: (eqA_dec x y).
+elim: l => [|hd tl hi] //=.
+case: (eqA_dec x hd) => /= heq hIn; first by left.
+by apply SetoidList.InA_cons; right; apply: hi.
 Qed.
   
-Lemma eql_iff_list : forall s s', eql s s' <-> equivlistA eqA (seq_to_list s) (seq_to_list s').
+Lemma eql_iff_list : forall s s', eql s s' <-> equivlistA eqA s s'.
 Proof.
 move => s s'; split.
 - move/eql_elim => heql. rewrite /equivlistA. move => x; split => h.
@@ -1028,14 +1022,14 @@ Qed.
 
 
 
-Lemma eq_list_iff_list : forall s s',  eqlistA eqA (seq_to_list s) (seq_to_list s') -> eq_list s s'. 
+Lemma eq_list_iff_list : forall s s',  eqlistA eqA s s' -> eq_list s s'.
 Proof.
 elim => [ | hd tl hi] [ | hd' tl'] //=.
 - move => h; inversion h.
 - move => h; inversion h.
 - move => h; inversion h; subst; clear h. case: (eqA_dec hd hd') => //=. 
   move => _; by apply: hi. 
-Qed. 
+Qed.
 
 Lemma eq_list_eql_Eq : forall (l l': seq A), Sorteds l -> Sorteds l' -> eql l l' ->  eq_list l l'.
 Proof.
@@ -1054,20 +1048,19 @@ move => l l' x h. move: x. elim : h => //=; clear l l'.
 - move => l1 l2 l3 hperm1 hi1 hperm2 hi2 a hIn. by apply: hi2 ; apply: hi1.
 Qed.
   
-Lemma neqs_perm : forall l l' k k', Permutation (seq_to_list l) (seq_to_list l') ->
-  Permutation (seq_to_list k) (seq_to_list k') -> neql l k -> neql l' k'.
+Lemma neqs_perm : forall l l' k k', Permutation l l' ->
+  Permutation k k' -> neql l k -> neql l' k'.
 Proof.
 move => l l' k k' hP1 hP2. case/neql_elim => a [ | ].
 - case/andP => h1 h2. apply/neql_elim; exists a; left; apply/andP ; split.
-  apply/InA2P. apply Permutation_InA2 with (seq_to_list l) => //. by apply/InA2P.
+  apply/InA2P. apply Permutation_InA2 with l => //. by apply/InA2P.
   move/negP: h2 => h2. apply/negP => h3. apply : h2. 
-  apply/InA2P. apply Permutation_InA2 with (seq_to_list k'). by symmetry. by apply/InA2P.
+  apply/InA2P. apply Permutation_InA2 with k'. by symmetry. by apply/InA2P.
 - case/andP => h1 h2. apply/neql_elim; exists a; right; apply/andP ; split.
   move/negP: h1 => h1. apply/negP => h3. apply : h1. 
-  apply/InA2P. apply Permutation_InA2 with (seq_to_list l'). by symmetry. by apply/InA2P.
-  apply/InA2P. apply Permutation_InA2 with (seq_to_list k) => //. by apply/InA2P.
+  apply/InA2P. apply Permutation_InA2 with l'. by symmetry. by apply/InA2P.
+  apply/InA2P. apply Permutation_InA2 with k => //. by apply/InA2P.
 Qed.
-
 
 End EqDec.
 (* end hide *)
@@ -1084,7 +1077,6 @@ Variable eqB: grel B.
 Context `{Equivalence A eqA}.
 Context `{Equivalence B eqB}.
 
-
 Definition eq_prod : grel (A*B) := fun x y => let (a,b) := x in
   let (a',b') := y in (eqA a a' /\ eqB b b').
 
@@ -1096,8 +1088,6 @@ split.
 - case => a b [a' b'] [a'' b''] [ha hb] [ha' hb']; split.
   by transitivity a'.   by transitivity b'.
 Qed.
-
-
 
 Lemma eq_prod_dec :(forall x y, {eqA x y}+{~eqA x y}) -> (forall x y, {eqB x y}+{~eqB x y}) ->
   forall x y, {eq_prod x y}+{~eq_prod x y}.
@@ -1120,7 +1110,6 @@ case: (hdec e hd) => //=.
   by rewrite in_cons h1 orbT.
 Defined. 
 
-
 (* end hide *)
 Variable f : A -> B.
 Definition f_set (E: gset A) : gset B := fun y => exists2 x, E x & eqB (f x) y.
@@ -1137,6 +1126,5 @@ exists a => //. split => //.  move => hxa. apply: hb.
 transitivity (f x). by symmetry. transitivity (f a) => //.
 by apply: f_compat.
 Qed.
-
   
 End Result.

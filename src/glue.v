@@ -10,11 +10,10 @@ Import Prenex Implicits.
 
 (** Definition of the eqType structure of the 3 states type _comparison_ *)
 Lemma comparison_negK : forall s t, s = CompOpp t -> t = CompOpp s.
-Proof.
-by case => [] [] .
-Qed.
+Proof. by case => [] []. Qed.
 
-Definition eq_comparison (a b:comparison) : bool := match a,b with
+Definition eq_comparison (a b:comparison) : bool :=
+match a,b with
  | Lt,Lt => true
  | Eq,Eq => true
  | Gt,Gt => true
@@ -28,14 +27,13 @@ by case : a b => [] [].
 by move => ->; case :b .
 Qed.
 
-
 Definition comparison_eq_mixin := EqMixin eq_comparison_axiom. 
-Canonical Structure comparison_eqType := EqType comparison 
-   comparison_eq_mixin.
+Canonical Structure comparison_eqType :=
+ EqType comparison comparison_eq_mixin.
 
 (** Definition of a canonical structure of an eqType with a 3 states
     total comparison function *)
-Record osym_module_mixin (symbol:eqType) : Type := OSymModuleMixin{
+Record osym_module_mixin (symbol:eqType) : Type := OSymModuleMixin {
   cmp : symbol -> symbol -> comparison;
   cmp_refl : forall s, cmp s s = Eq;
   cmp_eq_axiom : forall s t, reflect (s = t) (cmp s t == Eq);
@@ -106,30 +104,14 @@ Qed.
 (** Some very general definitions and missing 
     properties in ssreflect stdlib *)
 Section Glue.
+
 Variable A B: Type.
-
-
-Fixpoint seq_to_list (s:seq A) : list A := match s with
- | nil => List.nil
- | hd:: tl => (hd::(seq_to_list tl))%list
-end.
-
-
-
-Lemma flatten_cat: forall (l l':seq (seq A)) , 
-  flatten (l++l') = flatten l ++ flatten l'.
-Proof.
-elim => [ | hd tl Ih] l' //=.
-by rewrite -catA Ih.
-Qed.
-
 
 Lemma flatten_map_cons : forall (l:seq A), 
   flatten (map (fun xx => [::xx]) l) = l.
 Proof.
 elim => [ | hd tl ih] //=. by rewrite {1}ih.
 Qed.
-
 
 Definition dupl (X: seq (A*B)) : seq (A*A*B) :=
   map (fun (ab:A*B) => let (a,b) := ab in (a,a,b)) X.
@@ -141,6 +123,7 @@ Lemma dupl_strip : forall (X:seq (A*B)), strip (dupl X) = X.
 Proof.
 elim => [ | [hda hdb] tl hi ] //=. by rewrite hi.
 Qed.
+
 End Glue.
 
 Section Glue2.
@@ -264,7 +247,6 @@ rewrite (hi z htl hincl) andbT /=.
 move/linclP : hincl.  by apply. 
 Qed.
 
-
 Lemma strip_in : forall (X: seq (T*T*T')) (a a':T) (b:T'), 
   (a,a',b) \in X -> (a,b) \in (strip X).
 Proof.
@@ -274,6 +256,5 @@ rewrite !in_cons. case/orP.
   by rewrite (eqP heq) (eqP heq2) eq_refl .
 - move => h. by rewrite (hi a a' b h) orbT.
 Qed.
-
 
 End Glue2.
