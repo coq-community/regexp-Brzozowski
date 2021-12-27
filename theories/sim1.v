@@ -16,9 +16,9 @@ Import Prenex Implicits.
     of Brzozowski
 *)
 Section Similarity1.
-Variable symbol : eqType.
-Let regexp := regular_expression symbol.
-Let word := word symbol.
+Variable char : eqType.
+Let regexp := regular_expression char.
+Let word := word char.
 
 Fixpoint ssubl (r1: regexp) {struct r1} : regexp -> bool := 
 match r1 with
@@ -179,12 +179,12 @@ Proof.
 by move => r1 r2 s1 s2 /=.
 Qed.
 
-Lemma ssublVoid : forall r, ssubl (Void symbol) r.
+Lemma ssublVoid : forall r, ssubl (Void char) r.
 Proof.
 by move => r /=.
 Qed.
 
-Lemma ssubrVoid : forall r, ssubr r (Void symbol).
+Lemma ssubrVoid : forall r, ssubr r (Void char).
 Proof.
 elim => //=.  
 by move => r -> r' ->.
@@ -264,21 +264,21 @@ rewrite !ssubrPlus2.
 case/andP => h1 h2 ; by rewrite hc1 // hc2.
 Qed.
 
-Lemma ssublrV : forall r , ssubl r (Void symbol) = ssubr (Void symbol) r.
+Lemma ssublrV : forall r , ssubl r (Void char) = ssubr (Void char) r.
 Proof.
 elim => [ | | | a | c hc | c1 hc1 c2 hc2 | 
   c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c hc ] //.
 by rewrite ssublPlus2 ssubrPlus2 hc1 hc2.
 Qed.
 
-Lemma ssublrE : forall r , ssubl r (Eps symbol) = ssubr (Eps symbol) r.
+Lemma ssublrE : forall r , ssubl r (Eps char) = ssubr (Eps char) r.
 Proof.
 elim => [ | | | a | c hc | c1 hc1 c2 hc2 | 
   c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c hc ] //.
 by rewrite ssublPlus2 ssubrPlus2 hc1 hc2.
 Qed.
 
-Lemma ssublrD : forall r , ssubl r (Dot symbol) = ssubr (Dot symbol) r.
+Lemma ssublrD : forall r , ssubl r (Dot char) = ssubr (Dot char) r.
 Proof.
 elim => [ | | | a | c hc | c1 hc1 c2 hc2 | 
   c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c hc ] //.
@@ -428,7 +428,7 @@ Qed.
 
 
 Lemma ssubr_transV : forall y z, 
- ssubr (Void symbol) y -> ssubr y z -> ssubr (Void symbol) z.
+ ssubr (Void char) y -> ssubr y z -> ssubr (Void char) z.
 Proof.
 elim => [ | | | u | c hc | c1 hc1 c2 hc2 | 
   c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c hc ] z //.
@@ -442,7 +442,7 @@ by rewrite hc1' //  hc2'.
 Qed.
 
 Lemma ssubr_transE : forall y z, 
- ssubr (Eps symbol) y -> ssubr y z -> ssubr (Eps symbol) z.
+ ssubr (Eps char) y -> ssubr y z -> ssubr (Eps char) z.
 Proof.
 elim => [ | | | u | c hc | c1 hc1 c2 hc2 | 
   c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c hc ] z //.
@@ -460,7 +460,7 @@ by rewrite hc1' //  hc2'.
 Qed.
 
 Lemma ssubr_transD : forall y z, 
- ssubr (Dot symbol) y -> ssubr y z -> ssubr (Dot symbol) z.
+ ssubr (Dot char) y -> ssubr y z -> ssubr (Dot char) z.
 Proof.
 elim => [ | | | u | c hc | c1 hc1 c2 hc2 | 
   c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c hc ] z //.
@@ -706,8 +706,8 @@ rewrite ssubrPlusl => //.
 by rewrite ssubrPlusr.
 Qed.
 
-Lemma ssubrVoid_ok : forall b, ssubr (Void symbol) b -> 
-  forall x, (x \in b) -> (x \in (Void symbol)).
+Lemma ssubrVoid_ok : forall b, ssubr (Void char) b -> 
+  forall x, (x \in b) -> (x \in (Void char)).
 Proof.
 elim => //.
 move => r1 hr1 r2 hr2.  rewrite ssubrPlus2; case/andP => h1 h2 x.
@@ -716,8 +716,8 @@ rewrite -topredE /=; case/orP => hu.
 by apply: hr2.
 Qed.
 
-Lemma ssublEps_ok : forall b, ssubl (Eps symbol) b ->
-  forall x, (x \in (Eps symbol) ) -> (x \in b).
+Lemma ssublEps_ok : forall b, ssubl (Eps char) b ->
+  forall x, (x \in (Eps char) ) -> (x \in b).
 Proof.
 elim => //.
 move => r1 hr1 r2 hr2. rewrite ssublPlus1 //.
@@ -728,8 +728,8 @@ rewrite -!topredE /= => hx.
 apply/orP; right. by apply: hr2.
 Qed.
 
-Lemma ssubrEps_ok : forall b, ssubr (Eps symbol) b ->
-  forall x, (x \in b) -> (x \in (Eps symbol) ).
+Lemma ssubrEps_ok : forall b, ssubr (Eps char) b ->
+  forall x, (x \in b) -> (x \in (Eps char) ).
 Proof.
 elim => //.
 move => r1 hr1 r2 hr2. rewrite ssubrPlus2. 
@@ -739,8 +739,8 @@ rewrite -!topredE /=; case/orP => hu.
 move: (hr2 h2 x hu). by rewrite -topredE /=.
 Qed.
 
-Lemma ssublDot_ok : forall b, ssubl (Dot symbol) b ->
-  forall x, (x \in (Dot symbol) ) -> (x \in b).
+Lemma ssublDot_ok : forall b, ssubl (Dot char) b ->
+  forall x, (x \in (Dot char) ) -> (x \in b).
 Proof.
 elim => //.
 move => r1 hr1 r2 hr2. rewrite ssublPlus1 //.
@@ -751,8 +751,8 @@ rewrite -!topredE /= => hx.
 apply/orP; right. by apply: hr2.
 Qed.
 
-Lemma ssubrDot_ok : forall b, ssubr (Dot symbol) b ->
-  forall x, (x \in b) -> (x \in (Dot symbol)).
+Lemma ssubrDot_ok : forall b, ssubr (Dot char) b ->
+  forall x, (x \in b) -> (x \in (Dot char)).
 Proof.
 elim => //.
 move => r1 hr1 r2 hr2. rewrite ssubrPlus2. 

@@ -1,4 +1,4 @@
--R theories RegexpBrzozowski
+-Q theories RegexpBrzozowski
 
 -arg -w -arg -notation-overridden
 

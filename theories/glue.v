@@ -33,13 +33,13 @@ Canonical Structure comparison_eqType :=
 
 (** Definition of a canonical structure of an eqType with a 3 states
     total comparison function *)
-Record osym_module_mixin (symbol:eqType) : Type := OSymModuleMixin {
-  cmp : symbol -> symbol -> comparison;
+Record osym_module_mixin (char:eqType) : Type := OSymModuleMixin {
+  cmp : char -> char -> comparison;
   cmp_refl : forall s, cmp s s = Eq;
   cmp_eq_axiom : forall s t, reflect (s = t) (cmp s t == Eq);
-  cmp_trans : forall (s t u:symbol) (x:comparison),
+  cmp_trans : forall (s t u:char) (x:comparison),
     cmp s t = x -> cmp t u = x -> cmp s u = x;
-  cmp_neg : forall (s t:symbol), cmp t s = CompOpp (cmp s t)
+  cmp_neg : forall (s t:char), cmp t s = CompOpp (cmp s t)
 }.
 
 Record osym_module : Type := OSymModule {
