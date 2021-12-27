@@ -7,9 +7,10 @@ From RegexpBrzozowski Require Import glue.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
+(* end hide *)
 
 Section SetTheory.
-(* end hide *)
+
 Variable A:Type.
 
 (** In this file, I redefine some parts of Ensembles.v 
@@ -26,7 +27,7 @@ Definition r_inter  (r1 r2: grel) : grel := fun x y => r1 x y /\ r2 x y.
 Definition r_union (r1 r2: grel) : grel :=
   fun x y =>  r1 x y \/ r2 x y.
 
-Definition Empty_gset :gset := fun _ => False.
+Definition Empty_gset : gset := fun _ => False.
 
 Definition Intersection (B C:gset) : gset :=
   fun x: A =>  B x /\ C x.
@@ -40,20 +41,20 @@ by move => x; case.
 Qed.
 
 Fixpoint prodn (T:Type) (n:nat) : Type := match n with
- | O => unit
+ | 0 => unit
  | S p => (T * prodn T p)%type
 end.
 
-Fixpoint Finite_Union (n:nat) : prodn  gset n -> gset :=
+Fixpoint Finite_Union (n:nat) : prodn gset n -> gset :=
   match n with
-  |O => fun _  => Empty_gset 
-  | S p => fun es => let (hd,tl) := es in Union hd (Finite_Union  tl)
+  | 0 => fun _ => Empty_gset
+  | S _ => fun es => let (hd,tl) := es in Union hd (Finite_Union  tl)
 end.
 
 Fixpoint pred_prodn (T:Type) (P:T -> Prop) (n:nat) : prodn T n ->  Prop := 
  match n  with
-  | O => fun _ => True
-  | S p => fun Es => let (hd,tl) := Es in P hd /\ pred_prodn P tl
+  | 0 => fun _ => True
+  | S _ => fun Es => let (hd,tl) := Es in P hd /\ pred_prodn P tl
 end.
 
 Definition Included (E F: gset) := forall x, E x -> F x.
@@ -68,16 +69,13 @@ Inductive Acc (E:gset) (R:grel) (x:A) : Prop :=
 
 Definition well_founded := forall a: A, Acc E R a.
 
-
 Fixpoint guard n (wfR: well_founded): well_founded :=
   match n with
     | 0 => wfR
     | S n => fun x => Acc_intro (fun y _ _ => guard n (guard n wfR) y)
   end.
 
-
 End SetTheory.
-
 
 Section ExtendedSetTheory.
 
@@ -87,14 +85,14 @@ Variable A B : Type.
 Definition gpred_list  (E: gset A ) : gset (seq A)  := 
  fix aux l : Prop :=
   match l with
-  | nil => True
+  | [::] => True
   | x :: xs =>  E x /\ aux xs
 end.
 
 (* begin hide *)
 Fixpoint tool_list_to_prodn  (E:gset A) (R:grel A) (xs: seq A) : prodn (gset (seq A)) (size xs) :=
  match xs with
-  | nil => tt
+  | [::] => tt
   | hd :: tl => pair (gpred_list (Intersection E (R hd))) (tool_list_to_prodn E R tl)
 end.
 (* end hide *)
@@ -134,8 +132,8 @@ Definition Prod (E:gset A) (F:gset B) : gset (A*B) :=
 Definition grel_list (R:grel A) : grel (seq A) :=
   fix aux l : seq A -> Prop :=
     match l with
-     | nil => fun _ => False
-     | x::xs => Union (gpred_list (R x)) (aux  xs)
+     | [::] => fun _ => False
+     | x :: xs => Union (gpred_list (R x)) (aux  xs)
 end.
 
 
@@ -319,7 +317,7 @@ Definition nS : grel (seq A) := fun l l' => nR l' l.
 (** Decidable predicate of list membership *)
 Fixpoint InA (l:seq A) (a:A) : bool :=
  match l with
- | nil => false
+ | [::] => false
  | x :: xs => if eqA_dec a x then true else InA xs a
 end.
 
@@ -622,7 +620,7 @@ case => hhd htl. case: (InA l2 hd) => //=.
 - by split => //; apply: hi.
 Qed.
 
-Lemma sub_not_empty : forall l l', sub l l' -> lminus l' l <> nil.
+Lemma sub_not_empty : forall l l', sub l l' -> lminus l' l <> [::].
 Proof.
 move => l l'. move/sub_elim => [ _ [a h1 h2] ] heq.
 have h : (InA (lminus l' l) a). rewrite lminusE. by apply/andP; split.
@@ -724,7 +722,7 @@ Lemma lemma6 : forall E, E_compat E -> IFinite eqA E ->
   Bar sub (gpred_list  E).
 Proof.
 move => E hE hfE.
-have h : Bar sub (Intersection (gpred_list E) (sub nil)).
+have h : Bar sub (Intersection (gpred_list E) (sub [::])).
 - apply : (@tool6 E) =>//. move => x hx. by right. 
 apply cBar => y hP. apply: lemma6_prime2. by apply: wf_sup.
 Qed.
@@ -947,8 +945,8 @@ move => s s'; split.
 Qed.
 
 Fixpoint eq_list (s s':seq A) {struct s} : bool := match s,s' with
- | nil,nil => true
- | hd::tl , hd'::tl' => if eqA_dec hd hd' then eq_list tl tl' else false
+ | [::], [::] => true
+ | hd :: tl, hd' :: tl' => if eqA_dec hd hd' then eq_list tl tl' else false
  | _ , _ => false
 end.
 

@@ -15,10 +15,10 @@ Import Prenex Implicits.
 Section FiniteDer.
 
 (** the alphabet is style abstract *)
-Variable symbol : eqType.
+Variable char : eqType.
 
-Let regexp := regular_expression symbol.
-Let word := word symbol.
+Let regexp := regular_expression char.
+Let word := word char.
 
 (** Specification of the similarity:
     we want a decidable relation ~ over regexp such that:
@@ -73,14 +73,14 @@ Qed.
 Lemma wder_Star : forall u E, 
   similar (wder u (Star E)) (match u with
                                | [::] => Star E
-                               | _ => wder_sigma E (Star E) nil u
+                               | _ => wder_sigma E (Star E) [::] u
                              end).
 Proof.
 elim => [ | hd tl hi] E //=. 
 - reflexivity.
 rewrite wder_Conc wder_sigma_switch.
 case: (has_eps E). 
-- by symmetry. 
+- by symmetry.
 reflexivity.
 Qed.
 
@@ -103,7 +103,7 @@ Lemma set_of_der_compat : forall E x y, sim x y ->
 Proof.
 rewrite /set_of_der => E x y.
 rewrite /sim => heq.
-case => s heq2. exists s.  transitivity x => //. by symmetry. 
+case => s heq2. exists s.  transitivity x => //. by symmetry.
 Qed.
 
 (** Similarity is decidable *)
@@ -162,7 +162,7 @@ Proof.
 move => P. apply: cBar => G1. rewrite /In /pred_singl => h1. 
 apply cBar => G2. case => []. move => h2.  case.  move: h1 h2. 
 rewrite /sim. move => h1 h2.
-transitivity P => //. by symmetry. 
+transitivity P => //. by symmetry.
 Qed.
 
 (** if a set P is finite, its product by a constant stays finite 
@@ -185,7 +185,7 @@ apply: (@Bar_gset_incl _  (f_set sim fConc (Prod  P (pred_singl  F))));
   first done. 
 move => x. case. move => y [hl hr]. rewrite /f_set.
 exists (y,F). split => //. rewrite /pred_singl. reflexivity.
-rewrite /sim  /fConc. by symmetry. 
+rewrite /sim  /fConc. by symmetry.
 Qed.
 
 (** A regexp is a derivative of (E+F) if it's of the shape
@@ -221,7 +221,7 @@ apply: (@Bar_gset_incl _
  (f_set sim fPlus (Prod (set_of_der E) (set_of_der F)))); first done.
 move => x. rewrite /In /f_set /pred_plus. case. move => y.  move => [R []]. 
 move =>  h1 [h2 h3]. exists (y,R).  by split. 
-by symmetry. 
+by symmetry.
 Qed.
 
 (* if set_of_der E and set_of_der F are finite, 
@@ -263,7 +263,7 @@ apply: (@Bar_gset_incl  _
  (f_set sim fAnd (Prod (set_of_der E) (set_of_der F)))); first done.
 move => x. rewrite /In /f_set /pred_and. case. move => y.  
 move => [R []].  move =>  h1 [h2 h3]. exists (y,R).  by split. 
-by symmetry. 
+by symmetry.
 Qed.
 
 Lemma finite_der_And : forall E F, Finite (set_of_der E) -> 
@@ -294,7 +294,7 @@ have hsim : Finite (@f_set regexp regexp sim fNot (set_of_der E)).
 apply: (@Bar_gset_incl _ (@f_set regexp regexp sim fNot (set_of_der E))); 
  first done.
 move => x. rewrite /pred_not. case. move => y [h1 h2].
-exists y => //. by symmetry. 
+exists y => //. by symmetry.
 Qed.
 
 Lemma finite_der_Not : forall E, Finite (set_of_der E) -> 
@@ -314,10 +314,9 @@ Qed.
    rPlus a l == a + l1 + l2 + .. + ln
 *)
 Fixpoint rPlus a (l: seq regexp) := match l with
- | nil => a
+ | [::] => a
  | hd :: tl => Plus (rPlus a tl) hd
 end.
-
 
 Definition set_of_der_conc (E F: regexp): gset regexp := 
  fun G => exists e, exists l, 
@@ -337,16 +336,16 @@ Lemma incl_der_pred_conc : forall E F,
 Proof.
 move => E F G. case => s.
 rewrite wder_Conc. elim: s E F G => [ | hd tl hi] E F G /=.
-- move => h. exists E; exists nil => /= ; split. 
-  + by exists nil; reflexivity. 
-  by split. 
+- move => h. exists E, [::] => /= ; split.
+  + by exists [::]; reflexivity. 
+  by split.
 case : (has_eps E).
 - rewrite -wder_sigma_switch. 
   case: (@hi (der hd E) F (wder_sigma (der hd E) F [::] tl)). 
   + reflexivity. 
   move => G' [l ].  case => [[s hs] [h1 h2]] hG. exists (wder (hd::s) E).
-  exists (cons (wder (hd::tl) F) l); split. 
-  + exists (hd::s); by reflexivity.
+  exists (cons (wder (hd :: tl) F) l); split. 
+  + exists (hd :: s); by reflexivity.
   split => /=.
   + split => //.  exists (hd::tl); by reflexivity. 
   transitivity  
@@ -358,8 +357,8 @@ rewrite -wder_sigma_switch.
 case: (@hi (der hd E) F (wder_sigma (der hd E) F [::] tl)).  
 - reflexivity.
 move => G' [l].  case => [[s hs] [h1 h2]] hG. 
-exists (wder (hd::s) E). exists l; split. 
-- exists (hd::s); reflexivity. 
+exists (wder (hd :: s) E). exists l; split. 
+- exists (hd :: s); reflexivity. 
 split => //=. 
 transitivity (wder_sigma (der hd E) F [::] tl) => //.
 transitivity (rPlus (Conc G' F) l) => //.  
@@ -812,7 +811,7 @@ apply: (@Bar_gset_incl _ (f_set sim fConc2
 move => x. case. move => y. move => [R [h1 [h2 h3]]].
 rewrite /f_set. exists (y,F,R). split => //. split => //. 
 rewrite /pred_singl; reflexivity.
-rewrite /sim /fConc2.  by symmetry. 
+rewrite /sim /fConc2.  by symmetry.
 Qed.
 
 
@@ -844,7 +843,7 @@ apply: (@Bar_gset_incl _ (f_set sim fStar
 move => x. rewrite /set_of_der_star. case => e [l [h1 [h2 h3]]].
 rewrite /f_set. exists (e,E,l). split => //. split => //.
 by rewrite /pred_singl; reflexivity.
-move :h3; rewrite /sim /fStar. by symmetry. 
+move :h3; rewrite /sim /fStar. by symmetry.
 Qed.
 
 Lemma finite_der_Conc : forall E F, Finite (set_of_der E) -> 
@@ -886,91 +885,91 @@ elim => [ | | | s | c1 hc1 | c1 hc1 c2 hc2
 - apply: cBar => c. case => [ss]. 
   rewrite wder_Void /sim  => hVoid. apply cBar => [x]. case. case => [tt].
   rewrite wder_Void /sim  => hVoid2. case. rewrite /sim .
-  transitivity (Void symbol) => //. by symmetry. 
+  transitivity (Void char) => //. by symmetry.
 (* only Eps or Void in is wder Eps *)
 - apply: cBar => c. case => [ss]. 
   case : (wder_Eps ss) => ->.
   * move => hsim. apply cBar =>  [x].
     case. case => [ tt ]. case: (wder_Eps tt) => ->.
     + move => hsim2. case. rewrite /sim . 
-      transitivity (Eps symbol) => //; by symmetry. 
+      transitivity (Eps char) => //; by symmetry.
     + move => hsim2 _. apply cBar => [x']. case => [] [[tt']].
       case: (wder_Eps tt') => ->; move => hsim3.
-      case. transitivity (Eps symbol) =>//; by symmetry.
-      move => _; case. transitivity (Void symbol) =>//; by symmetry.
+      case. transitivity (Eps char) =>//; by symmetry.
+      move => _; case. transitivity (Void char) =>//; by symmetry.
   * move => hsim1. apply cBar =>  [x]. 
     case. case => [ tt ]. case: (wder_Eps tt) => ->.
     + move => hsim2 _ . apply cBar => [x']. case => [] [[tt']].
       case: (wder_Eps tt') => ->; move => hsim3. move => _; case.
-      transitivity (Eps symbol) => //. by symmetry.
-      case. transitivity (Void symbol) => //. by symmetry.
-    + move => hsim2. case. transitivity (Void symbol) => //. by symmetry. 
+      transitivity (Eps char) => //. by symmetry.
+      case. transitivity (Void char) => //. by symmetry.
+    + move => hsim2. case. transitivity (Void char) => //. by symmetry.
 (* same case study for Dot: only Eps Dot or Void are in wder Dot *)
 - apply: cBar => c; case => [ss]. 
   case : (wder_Dot ss) => [ -> | [ -> | ->]]. 
   * move => h1. apply cBar =>  [x]. case.  case => [tt]. 
     case : (wder_Dot tt) => [ -> | [ -> | -> ]]. move => h2.
-    + case. transitivity (Dot symbol) => //; by symmetry. 
+    + case. transitivity (Dot char) => //; by symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Dot uu) => [ -> | [ -> | -> ]].
-      move => h3. case.  by transitivity (Dot symbol) => //; symmetry. 
-      move => h3 _. case. by transitivity (Eps symbol) => //; symmetry. 
+      move => h3. case.  by transitivity (Dot char) => //; symmetry.
+      move => h3 _. case. by transitivity (Eps char) => //; symmetry.
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Dot vv) => [ -> | [ -> | -> ]].
-      move => h4. case. by transitivity (Dot symbol) =>//; symmetry. 
-      move => h4 _ . case. by transitivity (Eps symbol) => //; symmetry. 
-      move => h4 _ _ . case. by transitivity (Void symbol) =>//; symmetry. 
+      move => h4. case. by transitivity (Dot char) =>//; symmetry.
+      move => h4 _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 _ _ . case. by transitivity (Void char) =>//; symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Dot uu) => [ -> | [ -> | -> ]].
-      move => h3. case. by transitivity (Dot symbol) =>//; symmetry. 
+      move => h3. case. by transitivity (Dot char) =>//; symmetry.
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Dot vv) => [ -> | [ -> | -> ]].
-      move => h4. case. by transitivity (Dot symbol) => //; symmetry. 
-      move => h4 _ _ . case. by transitivity (Eps symbol) => //; symmetry. 
-      move => h4 _ . case. by transitivity (Void symbol) => //; symmetry. 
-      move => h3 _. case.  by transitivity (Void symbol) => //; symmetry. 
+      move => h4. case. by transitivity (Dot char) => //; symmetry.
+      move => h4 _ _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 _ . case. by transitivity (Void char) => //; symmetry.
+      move => h3 _. case.  by transitivity (Void char) => //; symmetry.
   * move => h1; apply cBar =>  [x]. case.  case => [tt].
     case : (wder_Dot tt) => [ -> | [ -> | -> ]]. move => h2.
     + move =>  _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Dot uu) => [ -> | [ -> | -> ]].
-      move => h3 _. case. by transitivity (Dot symbol) => //; symmetry. 
-      move => h3. case.  by transitivity (Eps symbol) => //; symmetry. 
+      move => h3 _. case. by transitivity (Dot char) => //; symmetry.
+      move => h3. case.  by transitivity (Eps char) => //; symmetry.
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Dot vv) => [ -> | [ -> | -> ]].
-      move => h4 _. case. by transitivity (Dot symbol) => //; symmetry. 
-      move => h4 . case. by transitivity (Eps symbol) =>//; symmetry. 
-      move => h4 _ _ . case. by transitivity (Void symbol)=>//; symmetry. 
-    + move => h2. case. by transitivity (Eps symbol) => //; symmetry. 
+      move => h4 _. case. by transitivity (Dot char) => //; symmetry.
+      move => h4 . case. by transitivity (Eps char) =>//; symmetry.
+      move => h4 _ _ . case. by transitivity (Void char)=>//; symmetry.
+    + move => h2. case. by transitivity (Eps char) => //; symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Dot uu) => [ -> | [ -> | -> ]].
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Dot vv) => [ -> | [ -> | -> ]].
-      move => h4 _ _. case. by transitivity (Dot symbol) => //; symmetry. 
-      move => h4 . case.  by transitivity (Eps symbol) => //; symmetry. 
-      move => h4 _ . case.  by transitivity (Void symbol) => //; symmetry. 
-      move => h3. case.  by transitivity (Eps symbol) => //; symmetry. 
-      move => h3 _. case.  by transitivity (Void symbol) => //; symmetry. 
+      move => h4 _ _. case. by transitivity (Dot char) => //; symmetry.
+      move => h4 . case.  by transitivity (Eps char) => //; symmetry.
+      move => h4 _ . case.  by transitivity (Void char) => //; symmetry.
+      move => h3. case.  by transitivity (Eps char) => //; symmetry.
+      move => h3 _. case.  by transitivity (Void char) => //; symmetry.
   * move => h1; apply cBar =>  [x]. case.  case => [tt]. 
     case : (wder_Dot tt) => [ -> | [ -> | -> ]]. move => h2.
     + move =>  _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Dot uu) => [ -> | [ -> | -> ]].
-      move => h3 _. case. by transitivity (Dot symbol) => //; symmetry. 
+      move => h3 _. case. by transitivity (Dot char) => //; symmetry.
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Dot vv) => [ -> | [ -> | -> ]].
-      move => h4 _. case. by transitivity (Dot symbol) => //; symmetry. 
-      move => h4 _ _ . case. by transitivity (Eps symbol) => //; symmetry. 
-      move => h4 . case. by transitivity (Void symbol) => //; symmetry. 
-      move => h3. case. by transitivity (Void symbol) => //; symmetry.
+      move => h4 _. case. by transitivity (Dot char) => //; symmetry.
+      move => h4 _ _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 . case. by transitivity (Void char) => //; symmetry.
+      move => h3. case. by transitivity (Void char) => //; symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Dot uu) => [ -> | [ -> | -> ]].
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Dot vv) => [ -> | [ -> | -> ]].
-      move => h4 _ _. case. by transitivity (Dot symbol) => //; symmetry.
-      move => h4 _ . case. by transitivity (Eps symbol) => //; symmetry. 
-      move => h4 . case.  by transitivity (Void symbol) => //; symmetry. 
-      move => h3 _. case.  by transitivity (Eps symbol) => //; symmetry. 
-      move => h3. case. by transitivity (Void symbol) => //; symmetry.
-    + move => h2. case. by transitivity (Void symbol) => //; symmetry.
+      move => h4 _ _. case. by transitivity (Dot char) => //; symmetry.
+      move => h4 _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 . case.  by transitivity (Void char) => //; symmetry.
+      move => h3 _. case.  by transitivity (Eps char) => //; symmetry.
+      move => h3. case. by transitivity (Void char) => //; symmetry.
+    + move => h2. case. by transitivity (Void char) => //; symmetry.
 - apply: cBar => c; case => [ss].
   case : (wder_Atom ss s) => [ -> | [ -> | ->]]. 
   * move => h1. apply cBar =>  [x]. case.  case => [tt]. 
@@ -978,43 +977,43 @@ elim => [ | | | s | c1 hc1 | c1 hc1 c2 hc2
     + case. by transitivity (Atom s) => //; symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Atom uu s) => [ -> | [ -> | -> ]].
-      move => h3. case. by transitivity (Atom s) => //; symmetry. 
-      move => h3 _. case. by transitivity (Eps symbol) => //; symmetry.
+      move => h3. case. by transitivity (Atom s) => //; symmetry.
+      move => h3 _. case. by transitivity (Eps char) => //; symmetry.
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Atom vv s) => [ -> | [ -> | -> ]].
       move => h4. case. by transitivity (Atom s) => //; symmetry.
-      move => h4 _ . case. by transitivity (Eps symbol) => //; symmetry.
-      move => h4 _ _ . case. by transitivity (Void symbol) => //; symmetry.
+      move => h4 _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 _ _ . case. by transitivity (Void char) => //; symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Atom uu s) => [ -> | [ -> | -> ]].
       move => h3. case. by transitivity (Atom s) => //; symmetry.
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Atom vv s) => [ -> | [ -> | -> ]].
       move => h4. case. by transitivity (Atom s) => //; symmetry.
-      move => h4 _ _ . case. by transitivity (Eps symbol) => //; symmetry.
-      move => h4 _ . case. by transitivity (Void symbol) => //; symmetry.
-      move => h3 _. case. by transitivity (Void symbol) => //; symmetry.
+      move => h4 _ _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 _ . case. by transitivity (Void char) => //; symmetry.
+      move => h3 _. case. by transitivity (Void char) => //; symmetry.
   * move => h1; apply cBar =>  [x]. case.  case => [tt]. 
     case : (wder_Atom tt s) => [ -> | [ -> | -> ]]. move => h2.
     + move =>  _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Atom uu s) => [ -> | [ -> | -> ]].
       move => h3 _. case. by transitivity (Atom s) => //; symmetry.
-      move => h3. case. by transitivity (Eps symbol) => //; symmetry. 
+      move => h3. case. by transitivity (Eps char) => //; symmetry.
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Atom vv s) => [ -> | [ -> | -> ]].
       move => h4 _. case. by transitivity (Atom s) => //; symmetry.
-      move => h4 . case. by transitivity (Eps symbol) => //; symmetry.
-      move => h4 _ _ . case. by transitivity (Void symbol) => //; symmetry.
-    + move => h2. case. by transitivity (Eps symbol) => //; symmetry.
+      move => h4 . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 _ _ . case. by transitivity (Void char) => //; symmetry.
+    + move => h2. case. by transitivity (Eps char) => //; symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Atom uu s) => [ -> | [ -> | -> ]].
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Atom vv s) => [ -> | [ -> | -> ]].
       move => h4 _ _. case. by transitivity (Atom s) => //; symmetry.
-      move => h4 . case. by transitivity (Eps symbol) => //; symmetry.
-      move => h4 _ . case. by transitivity (Void symbol) => //; symmetry.
-      move => h3. case. by transitivity (Eps symbol) => //; symmetry.
-      move => h3 _. case. by transitivity (Void symbol) => //; symmetry.
+      move => h4 . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 _ . case. by transitivity (Void char) => //; symmetry.
+      move => h3. case. by transitivity (Eps char) => //; symmetry.
+      move => h3 _. case. by transitivity (Void char) => //; symmetry.
   * move => h1; apply cBar =>  [x]. case.  case => [tt]. 
     case : (wder_Atom tt s) => [ -> | [ -> | -> ]]. move => h2.
     + move =>  _. apply cBar => [x']. case => [] [[uu]]. 
@@ -1023,19 +1022,19 @@ elim => [ | | | s | c1 hc1 | c1 hc1 c2 hc2
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Atom vv s) => [ -> | [ -> | -> ]].
       move => h4 _. case. by transitivity (Atom s) => //; symmetry.
-      move => h4 _ _ . case. by transitivity (Eps symbol) => //; symmetry.
-      move => h4 . case. by transitivity (Void symbol) => //; symmetry.
-      move => h3. case. by transitivity (Void symbol) => //; symmetry.
+      move => h4 _ _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 . case. by transitivity (Void char) => //; symmetry.
+      move => h3. case. by transitivity (Void char) => //; symmetry.
     + move => h2 _. apply cBar => [x']. case => [] [[uu]]. 
       case : (wder_Atom uu s) => [ -> | [ -> | -> ]].
       move => h3 _ _. apply cBar => [z]. case => [] [[[vv]]]. 
       case :(wder_Atom vv s) => [ -> | [ -> | -> ]].
       move => h4 _ _. case. by transitivity (Atom s) => //; symmetry.
-      move => h4 _ . case. by transitivity (Eps symbol) => //; symmetry.
-      move => h4 . case. by transitivity (Void symbol) => //; symmetry.
-      move => h3 _. case. by transitivity (Eps symbol) => //; symmetry.
-      move => h3. case. by transitivity (Void symbol) => //; symmetry.
-    + move => h2. case. by transitivity (Void symbol) => //; symmetry.
+      move => h4 _ . case. by transitivity (Eps char) => //; symmetry.
+      move => h4 . case. by transitivity (Void char) => //; symmetry.
+      move => h3 _. case. by transitivity (Eps char) => //; symmetry.
+      move => h3. case. by transitivity (Void char) => //; symmetry.
+    + move => h2. case. by transitivity (Void char) => //; symmetry.
 (* Star *)
 - by apply: finite_der_Star.
 (* Plus *)

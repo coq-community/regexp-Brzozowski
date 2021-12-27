@@ -10,6 +10,7 @@ Import Prenex Implicits.
 (* end hide*)
 
 Section RegExp.
+(** Character or symbol *)
 Variable char : eqType.
 
 (** Extended regular expression with boolean operators *)
@@ -266,10 +267,10 @@ Qed.
 Fixpoint wder_sigma (r1 r2: regular_expression) (s t: word char) : 
   regular_expression :=
   match t with
-  | nil => Conc (wder s r1) r2
+  | [::] => Conc (wder s r1) r2
   | hd :: tl => if has_eps (wder s r1) then 
-      Plus (wder_sigma r1 r2 (s++hd::nil) tl) (wder t r2)
-     else wder_sigma r1 r2 (s++hd::nil) tl
+      Plus (wder_sigma r1 r2 (s ++ [:: hd]) tl) (wder t r2)
+     else wder_sigma r1 r2 (s ++ [:: hd]) tl
 end.
 
 Lemma wder_sigma_switch : forall t s x E F, 
@@ -279,7 +280,7 @@ elim => [ | hd tl hi] s x E F //=. case (has_eps (wder s (der x E))).
 congr Plus. by rewrite hi. by rewrite hi.
 Qed.
 
-Lemma wder_Conc: forall u E F, wder u (Conc E F) = wder_sigma E F  nil u.
+Lemma wder_Conc: forall u E F, wder u (Conc E F) = wder_sigma E F [::] u.
 Proof.
 elim => [ | hd tl hi] E F //=. case: (has_eps E).  
 - by rewrite wder_Plus hi wder_sigma_switch.
@@ -294,7 +295,7 @@ Qed.
    its main form is:
    (E* )/s = E/s.E* + \sigma_s \delta(E/s_1)...\delta(E/s_p)E/s_q.E*
    for any possibility to write s = s_1 ++ s_2 ++ .. ++ s_p ++ s_q
-   with s_i <> nil
+   with s_i <> [::]
 
   for example, (E* )/xy = E/xy.E* + \delta(E/x) E/y.E*
 	       (E* )/xyz = E/xyz.E* + \delta(E/x) E/yz.E* +
@@ -307,6 +308,3 @@ Qed.
 *) 
 
 End RegExp.
-
-
- 
