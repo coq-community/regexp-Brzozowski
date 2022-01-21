@@ -42,7 +42,7 @@ of regular expressions for correctness.
 - Compatible Coq versions: 8.10 or later
 - Additional dependencies:
   - [MathComp](https://math-comp.github.io) 1.12.0 or later (`ssreflect` suffices)
-  - [RegLang](https://github.com/coq-community/reglang) development version
+  - [RegLang](https://github.com/coq-community/reglang) 1.1.3 or later
 - Coq namespace: `RegexpBrzozowski`
 - Related publication(s):
   - [A Decision Procedure for Regular Expression Equivalence in Type Theory](https://link.springer.com/chapter/10.1007%2F978-3-642-25379-9_11) doi:[10.1007/978-3-642-25379-9_11](https://doi.org/10.1007/978-3-642-25379-9_11)
