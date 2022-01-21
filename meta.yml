@@ -90,15 +90,6 @@ categories:
 - name: Computer Science/Decision Procedures and Certified Algorithms/Correctness proofs of algorithms
 - name: Computer Science/Formal Languages Theory and Automata
 
-build: |-
- ## Building instructions
-
- ``` shell
- git clone https://github.com/coq-community/regexp-Brzozowski
- cd regexp-Brzozowski
- make   # or make -j <number-of-cores-on-your-machine>
- ```
-
 documentation: |-
   ## Documentation
 

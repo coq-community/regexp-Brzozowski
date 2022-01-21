@@ -47,13 +47,25 @@ of regular expressions for correctness.
 - Related publication(s):
   - [A Decision Procedure for Regular Expression Equivalence in Type Theory](https://link.springer.com/chapter/10.1007%2F978-3-642-25379-9_11) doi:[10.1007/978-3-642-25379-9_11](https://doi.org/10.1007/978-3-642-25379-9_11)
 
-## Building instructions
+## Building and installation instructions
+
+The easiest way to install the latest released version of Regexp Brzozowski
+is via [OPAM](https://opam.ocaml.org/doc/Install.html):
+
+```shell
+opam repo add coq-released https://coq.inria.fr/opam/released
+opam install coq-regexp-brzozowski
+```
+
+To instead build and install manually, do:
 
 ``` shell
-git clone https://github.com/coq-community/regexp-Brzozowski
+git clone https://github.com/coq-community/regexp-Brzozowski.git
 cd regexp-Brzozowski
-make   # or make -j <number-of-cores-on-your-machine>
+make   # or make -j <number-of-cores-on-your-machine> 
+make install
 ```
+
 
 ## Documentation
 
