@@ -167,11 +167,25 @@ Qed.
 (** boolean operator to check inclusion of lists:
     lincl l l' means that forall x in l, x is in l'
 *)
+
 Fixpoint lincl (l l':seq T) : bool :=
 match l with
  | [::] => true
  | hd :: tl => (hd \in l') && (lincl tl l')
 end.
+
+Lemma linclP l l' : reflect {subset l <= l'} (lincl l l').
+Proof.
+apply: (iffP idP).
+- elim: l => [|hd tl hi] //=.
+  case/andP => hhd htl a; rewrite in_cons.
+  case/orP => hu; last by apply: hi.
+  by rewrite (eqP hu).
+- elim: l => [|hd tl hi] //= h.
+  apply/andP; split; first by apply: h; rewrite in_cons eq_refl.
+  apply/hi => a h'; apply: h.
+  by rewrite in_cons h' orbT.
+Qed.
 
 Lemma lincl_cons : forall (l l1:seq T) a, lincl l l1 -> lincl l (a::l1).
 Proof.
@@ -194,31 +208,7 @@ elim => [ | hd tl hi] //=. apply/andP; split.
 Qed.
 
 Lemma lincl_nil : forall (l:seq T), lincl l [::] -> l = [::].
-Proof.
-by case. 
-Qed.
-
-Lemma linclP : forall (l l':seq T),
-  reflect (forall a, (a \in l) -> (a \in l')) (lincl l l').
-Proof.
-move => l l'; apply : (iffP idP).
-- elim : l => [ | hd tl hi] //=.
-  case/andP => hhd htl a. rewrite in_cons; case/orP => hu.
-  by rewrite (eqP hu).
-  by apply: hi.
-- elim : l => [ | hd tl hi] //=.
-  move => h. apply/andP; split.
-  by apply: h; rewrite in_cons eq_refl.
-  apply: hi => a h'.
-  apply: h.
-  by rewrite in_cons h' orbT.
-Qed.
-
-Lemma lincl_mem: forall (l l': seq T), lincl l l' ->
- forall a, (a\in l) -> (a \in l'). 
-Proof.
-move => l l' h. by apply/linclP.
-Qed.
+Proof. by case.  Qed.
 
 Lemma lincl_trans : transitive lincl.
 Proof.
@@ -235,7 +225,7 @@ Proof.
 elim => [ | [[hd1 hd2] hdb] tl hi] //= a a' b.
 rewrite !in_cons. case/orP.
 - rewrite eqE /=. case/andP. case/andP => /= heq _ heq2.
-  by rewrite (eqP heq) (eqP heq2) eq_refl .
+  by rewrite (eqP heq) (eqP heq2) eq_refl.
 - move => h. by rewrite (hi a a' b h) orbT.
 Qed.
 

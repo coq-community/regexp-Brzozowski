@@ -471,14 +471,14 @@ Lemma bregexp_eqP : forall (r1 r2:bregexp),
   reflect (r1 ≡ r2) (bregexp_eq r1 r2).
 Proof.
 move => r1 r2.
-have h1 : (r1,r2,[::]) \in build_list_fun r1 r2.  
-- rewrite /build_list_fun.
-  apply: (@lincl_mem _ [:: (r1,r2,[::])]). 
-  by apply: l1. by rewrite /= in_cons eq_refl. 
-have h2 : r_subset sim3 (DER (build_list_fun r1 r2)) 
-                        (build_list_fun r1 r2).
-- rewrite /build_list_fun; apply: l3.
-  by rewrite lminus_incl.
+have h1 : (r1,r2,[::]) \in build_list_fun r1 r2.
+ rewrite /build_list_fun.
+ apply: (linclP [:: (r1,r2,[::])]); first by apply: l1.
+ by rewrite /= in_cons eq_refl.
+have h2: r_subset sim3 (DER (build_list_fun r1 r2))
+ (build_list_fun r1 r2).
+ rewrite /build_list_fun; apply: l3.
+ by rewrite lminus_incl.
 apply: (iffP allP).
 - rewrite /bregexp_eq => h. apply EQUIV3.
   move => e f. rewrite /set_pair_der  => [[s he hf]].
@@ -488,7 +488,7 @@ apply: (iffP allP).
   rewrite /delta2 => heq. by rewrite (eqP heq).
 - move => h [[e f] v] hIn. rewrite /delta2 !has_epsE.
   have: (Prod (set_pair_ders r1 r2) bT (e,f,v)).
-  + apply: (gpred_listP2 hIn). by apply: l2.
+   by apply: (gpred_listP2 hIn); apply: l2.
   case => [[s -> ->]] _. apply/eqP. by apply in_wder_compat.
 Qed.
 
@@ -648,7 +648,7 @@ set L := build_list_fun E E.
 case: (@tool_bl L _ E E _ u) => [ | | f [f' [v [h1 h2 h3]]]].
 - rewrite /L /build_list_fun. apply: l3. 
   by apply: lminus_incl.
--  apply: (@lincl_mem _ [:: (E,E,[::])]).
+-  apply: (linclP [:: (E,E,[::])]).
    by apply: l1. by rewrite /= in_cons eq_refl.
 exists f; exists v; split => //.
 rewrite /build_list_der. move/strip_in : h1.
