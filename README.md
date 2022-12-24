@@ -39,9 +39,9 @@ of regular expressions for correctness.
 - Coq-community maintainer(s):
   - Anton Trunov ([**@anton-trunov**](https://github.com/anton-trunov))
 - License: [MIT License](LICENSE)
-- Compatible Coq versions: 8.10 or later
+- Compatible Coq versions: 8.11 or later
 - Additional dependencies:
-  - [MathComp](https://math-comp.github.io) 1.12.0 or later (`ssreflect` suffices)
+  - [MathComp](https://math-comp.github.io) 1.13.0 or later (`ssreflect` suffices)
   - [RegLang](https://github.com/coq-community/reglang) 1.1.3 or later
 - Coq namespace: `RegexpBrzozowski`
 - Related publication(s):

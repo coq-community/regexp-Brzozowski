@@ -20,8 +20,8 @@ of regular expressions for correctness."""
 build: [make "-j%{jobs}%"]
 install: [make "install"]
 depends: [
-  "coq" {(>= "8.10" & < "8.17~") | (= "dev")}
-  "coq-mathcomp-ssreflect" {(>= "1.12.0" & < "1.16~") | (= "dev")}
+  "coq" {(>= "8.11" & < "8.18~") | (= "dev")}
+  "coq-mathcomp-ssreflect" {(>= "1.13.0" & < "1.16~") | (= "dev")}
   "coq-reglang" {(>= "1.1.3" & < "1.2~") | (= "dev")}
 ]
 

@@ -8,7 +8,8 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 (* end hide *)
 
-(** Definition of the eqType structure of the 3 states type _comparison_ *)
+(** Definition of the [eqType] structure of the 3 states type [comparison] *)
+
 Lemma comparison_negK : forall s t, s = CompOpp t -> t = CompOpp s.
 Proof. by case => [] []. Qed.
 
@@ -27,7 +28,8 @@ by case : a b => [] [].
 by move => ->; case :b .
 Qed.
 
-Definition comparison_eq_mixin := EqMixin eq_comparison_axiom. 
+Definition comparison_eq_mixin :=
+ EqMixin eq_comparison_axiom.
 Canonical Structure comparison_eqType :=
  EqType comparison comparison_eq_mixin.
 
@@ -48,21 +50,20 @@ Record osym_module : Type := OSymModule {
 }.
 
 Definition cmpS (s:osym_module) := cmp (spec s).
-Definition leS (S:osym_module) := fun (x y:S) => if cmpS x y is Gt then false else true.
+Definition leS (S:osym_module) :=
+ fun (x y:S) => if cmpS x y is Gt then false else true.
 
 Lemma cmpS_refl : forall (S:osym_module) (b:S), cmpS b b = Eq.
-Proof.
-move => S b.
-by rewrite /cmpS cmp_refl.
-Qed.
+Proof. by move => S b; rewrite /cmpS cmp_refl. Qed.
 
-Lemma cmpS_eq_axiom : forall (S:osym_module) (a b:S), reflect (a = b) (cmpS a b == Eq).
+Lemma cmpS_eq_axiom : forall (S:osym_module) (a b:S),
+ reflect (a = b) (cmpS a b == Eq).
 Proof.
 move => S a b. rewrite /cmpS. by apply: cmp_eq_axiom.
 Qed.
 
 Lemma cmpS_trans : forall (S:osym_module) (a b c:S) (x: comparison),
-  cmpS a b = x -> cmpS b c = x -> cmpS a c = x.
+ cmpS a b = x -> cmpS b c = x -> cmpS a c = x.
 Proof.
 move => S a b c x.
 rewrite /cmpS => h1 h2. by apply  (@cmp_trans _ _ a b c).
@@ -100,54 +101,35 @@ Proof.
 rewrite /leS => S a b. rewrite cmpS_neg. by case: (cmpS b a).
 Qed.
 
-
 (** Some very general definitions and missing 
     properties in ssreflect stdlib *)
 Section Glue.
 
-Variable A B: Type.
+Variables A B : Type.
 
-Lemma flatten_map_cons : forall (l:seq A), 
-  flatten (map (fun xx => [::xx]) l) = l.
+Lemma flatten_map_cons (l:seq A) :
+ flatten [seq (cons^~ [::]) i | i <- l] = l.
 Proof.
-elim => [ | hd tl ih] //=. by rewrite {1}ih.
+elim: l => [ | hd tl ih] //=. by rewrite {1}ih.
 Qed.
 
 Definition dupl (X: seq (A*B)) : seq (A*A*B) :=
   map (fun (ab:A*B) => let (a,b) := ab in (a,a,b)) X.
 
 Definition strip (X: seq (A*A*B)) : seq (A*B) :=
-  map (fun ab:A*A*B => let (aa,b) := ab in let (a,_) := aa in (a,b)) X.
+  map (fun (ab:A*A*B) => let (aa,b) := ab in let (a,_) := aa in (a,b)) X.
 
 Lemma dupl_strip : forall (X:seq (A*B)), strip (dupl X) = X.
 Proof.
-elim => [ | [hda hdb] tl hi ] //=. by rewrite hi.
+by elim => [|[hda hdb] tl hi] //=; rewrite hi.
 Qed.
 
 End Glue.
 
 Section Glue2.
 
-Variable T T':eqType.
-Variable R: rel T.
-
-(** some usefull lemmas to deal with sorted + undup sequences *)
-Lemma path_undup : forall (hR : transitive R) l (x:T), path R x l -> path R x (undup l).
-Proof.
-move => hR. elim => [ | hd tl hi] x //=.
-case/andP => hhd htl. case: (hd \in tl) => //=.
-- apply:hi. elim: tl htl => [ | a b hi] //=.
-  case/andP => hd2 h. apply/andP ; split => //. by apply (hR hd).
-- apply/andP; split => //. by apply: hi.
-Qed.
-
-Lemma sorted_undup : forall (hR: transitive R) (l:seq T), sorted R l -> sorted R (undup l).
-Proof.
-move => hR. elim => [ | hd tl hi] //=.
-case: (hd \in tl) => hp /=.
-- apply: hi. by apply: (@path_sorted _ _ hd).
-- by apply: path_undup.
-Qed.
+Variables T T' : eqType.
+Variable R : rel T.
 
 Lemma tool_undup_size : forall (l l': seq T), size (undup l') <= size (undup (l++l')).
 Proof.
@@ -185,11 +167,25 @@ Qed.
 (** boolean operator to check inclusion of lists:
     lincl l l' means that forall x in l, x is in l'
 *)
+
 Fixpoint lincl (l l':seq T) : bool :=
 match l with
  | [::] => true
  | hd :: tl => (hd \in l') && (lincl tl l')
 end.
+
+Lemma linclP l l' : reflect {subset l <= l'} (lincl l l').
+Proof.
+apply: (iffP idP).
+- elim: l => [|hd tl hi] //=.
+  case/andP => hhd htl a; rewrite in_cons.
+  case/orP => hu; last by apply: hi.
+  by rewrite (eqP hu).
+- elim: l => [|hd tl hi] //= h.
+  apply/andP; split; first by apply: h; rewrite in_cons eq_refl.
+  apply/hi => a h'; apply: h.
+  by rewrite in_cons h' orbT.
+Qed.
 
 Lemma lincl_cons : forall (l l1:seq T) a, lincl l l1 -> lincl l (a::l1).
 Proof.
@@ -212,31 +208,7 @@ elim => [ | hd tl hi] //=. apply/andP; split.
 Qed.
 
 Lemma lincl_nil : forall (l:seq T), lincl l [::] -> l = [::].
-Proof.
-by case. 
-Qed.
-
-Lemma linclP : forall (l l':seq T),
-  reflect (forall a, (a \in l) -> (a \in l')) (lincl l l').
-Proof.
-move => l l'; apply : (iffP idP).
-- elim : l => [ | hd tl hi] //=.
-  case/andP => hhd htl a. rewrite in_cons; case/orP => hu.
-  by rewrite (eqP hu).
-  by apply: hi.
-- elim : l => [ | hd tl hi] //=.
-  move => h. apply/andP; split.
-  by apply: h; rewrite in_cons eq_refl.
-  apply: hi => a h'.
-  apply: h.
-  by rewrite in_cons h' orbT.
-Qed.
-
-Lemma lincl_mem: forall (l l': seq T), lincl l l' ->
- forall a, (a\in l) -> (a \in l'). 
-Proof.
-move => l l' h. by apply/linclP.
-Qed.
+Proof. by case.  Qed.
 
 Lemma lincl_trans : transitive lincl.
 Proof.
@@ -253,7 +225,7 @@ Proof.
 elim => [ | [[hd1 hd2] hdb] tl hi] //= a a' b.
 rewrite !in_cons. case/orP.
 - rewrite eqE /=. case/andP. case/andP => /= heq _ heq2.
-  by rewrite (eqP heq) (eqP heq2) eq_refl .
+  by rewrite (eqP heq) (eqP heq2) eq_refl.
 - move => h. by rewrite (hi a a' b h) orbT.
 Qed.
 
