@@ -799,9 +799,9 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
   case/starP => v. move/allP => h1 /= h2.  
   apply/starP; exists v => //.
   apply/allP => y hy.
-  case/andP : (h1 y hy) => hy1 hy2.
+  case/andP: (h1 y hy) => hy1 hy2.
   apply/andP; split => //.
-  by rewrite inE (ha d h y).
+  by rewrite ?inE (ha d h y).
 by rewrite ssublPlus1 => //;
   case/orP => hu x hx;  rewrite -topredE /=; 
    apply/orP; [left; rewrite (hd1 hu x hx) | 
@@ -822,7 +822,7 @@ elim => [ | | |t  | d _ | d1 hd1 d2 hd2 |
   apply/allP => y hy.
   case/andP : (h1 y hy) => hy1 hy2.
   apply/andP; split => //.
-  by rewrite inE (ha d h y).
+  by rewrite ?inE (ha d h y).
 by rewrite ssubrPlus2; case/andP => h1 h2 x;
   rewrite -topredE /=; case/orP => hx ; 
    [rewrite  (hd1 h1 x hx) |
