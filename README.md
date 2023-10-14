@@ -39,10 +39,10 @@ of regular expressions for correctness.
 - Coq-community maintainer(s):
   - Anton Trunov ([**@anton-trunov**](https://github.com/anton-trunov))
 - License: [MIT License](LICENSE)
-- Compatible Coq versions: 8.11 or later
+- Compatible Coq versions: 8.11 to 8.18
 - Additional dependencies:
-  - [MathComp](https://math-comp.github.io) 1.13.0 or later (`ssreflect` suffices)
-  - [RegLang](https://github.com/coq-community/reglang) 1.1.3 or later
+  - [MathComp](https://math-comp.github.io) 1.13.0 to 1.17.0 (`ssreflect` suffices)
+  - [RegLang](https://github.com/coq-community/reglang) 1.1.3
 - Coq namespace: `RegexpBrzozowski`
 - Related publication(s):
   - [A Decision Procedure for Regular Expression Equivalence in Type Theory](https://link.springer.com/chapter/10.1007%2F978-3-642-25379-9_11) doi:[10.1007/978-3-642-25379-9_11](https://doi.org/10.1007/978-3-642-25379-9_11)

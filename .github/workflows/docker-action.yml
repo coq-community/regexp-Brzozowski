@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         image:
-          - 'mathcomp/mathcomp-dev:coq-dev'
+          - 'mathcomp/mathcomp:1.17.0-coq-8.18'
           - 'mathcomp/mathcomp:1.16.0-coq-8.17'
           - 'mathcomp/mathcomp:1.16.0-coq-8.16'
           - 'mathcomp/mathcomp:1.15.0-coq-8.16'
@@ -35,11 +35,6 @@ jobs:
         with:
           opam_file: 'coq-regexp-brzozowski.opam'
           custom_image: ${{ matrix.image }}
-          before_install: |
-            startGroup "Setup and print opam config"
-              opam repo -a --set-default add coq-extra-dev https://coq.inria.fr/opam/extra-dev
-              opam config list; opam repo list; opam list
-            endGroup
 
 
 # See also:
