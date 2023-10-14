@@ -19,7 +19,7 @@ Definition ve : seq bregexp := [:: V ; E].
 Definition eve : seq bregexp := [:: E ; V ; E].
 Definition deve : seq bregexp := [:: D ; E ; V ; E].
 
-Definition sim1_dec := sim_dec (@ssim1 [eqType of bool]).
+Definition sim1_dec := sim_dec (@ssim1 bool).
 Definition sim2_dec := sim_dec ssim2.
 
 Definition T : bregexp := Atom true.

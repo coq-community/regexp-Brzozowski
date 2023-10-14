@@ -1075,28 +1075,28 @@ Definition sim1_finite_number_of_der :=
   finite_number_of_der 
   (@ssim1_Plus_id _) (@ssim1_PlusC _) (@ssim1_PlusA _)
   (@ssim1_congr_Conc _) (@ssim1_congr_Plus _) (@ssim1_congr_And _)
-  (@ssim1_congr_Star _) (@ssim1_congr_Not [eqType of bool]).
+  (@ssim1_congr_Star _) (@ssim1_congr_Not bool).
 
 Definition sim1_build_list_fun :=
   build_list_fun 
   (@ssim1_Plus_id _) (@ssim1_PlusC _) (@ssim1_PlusA _)
   (@ssim1_congr_Conc _) (@ssim1_congr_Plus _) (@ssim1_congr_And _)
-  (@ssim1_congr_Star _) (@ssim1_congr_Not [eqType of bool]).
+  (@ssim1_congr_Star _) (@ssim1_congr_Not bool).
 
 Definition sim1_build_list_der :=
  build_list_der
   (@ssim1_Plus_id _) (@ssim1_PlusC _) (@ssim1_PlusA _)
   (@ssim1_congr_Conc _) (@ssim1_congr_Plus _) (@ssim1_congr_And _)
-  (@ssim1_congr_Star _) (@ssim1_congr_Not [eqType of bool]).
+  (@ssim1_congr_Star _) (@ssim1_congr_Not bool).
 
 Definition sim1_bregexp_eq := 
   bregexp_eq
   (@ssim1_Plus_id _) (@ssim1_PlusC _) (@ssim1_PlusA _)
   (@ssim1_congr_Conc _) (@ssim1_congr_Plus _) (@ssim1_congr_And _)
-  (@ssim1_congr_Star _) (@ssim1_congr_Not [eqType of bool]).
+  (@ssim1_congr_Star _) (@ssim1_congr_Not bool).
 
 Definition sim1_bregexp_sub :=
  bregexp_sub
   (@ssim1_Plus_id _) (@ssim1_PlusC _) (@ssim1_PlusA _)
   (@ssim1_congr_Conc _) (@ssim1_congr_Plus _) (@ssim1_congr_And _)
-  (@ssim1_congr_Star _) (@ssim1_congr_Not [eqType of bool]).
+  (@ssim1_congr_Star _) (@ssim1_congr_Not bool).

@@ -1,6 +1,7 @@
 -Q theories RegexpBrzozowski
 
 -arg -w -arg -notation-overridden
+-arg -w -arg -redundant-canonical-projection
 
 theories/glue.v
 theories/regexp.v

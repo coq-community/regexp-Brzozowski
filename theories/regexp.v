@@ -1,4 +1,5 @@
 (* begin hide *)
+From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
 From mathcomp Require Import bigop path.
 From RegLang Require Import languages.
@@ -67,9 +68,7 @@ elim :r1 r2 => [ | | | s | c hc | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 
 - case => //=. move => r hi; by rewrite (hc r hi).
 Qed.
 
-Definition regexp_eq_mixin := EqMixin regular_expression_eq_axiom.
-
-Canonical Structure regexp_eqType := EqType regular_expression regexp_eq_mixin.
+HB.instance Definition _ := hasDecEq.Build regular_expression regular_expression_eq_axiom.
 
 Local Arguments void : clear implicits.
 Local Arguments eps : clear implicits.
