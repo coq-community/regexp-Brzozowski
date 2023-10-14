@@ -1,5 +1,6 @@
 (* begin hide *)
 From Coq Require Import RelationClasses Setoid Morphisms.
+From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype. 
 From mathcomp Require Import bigop path.
 From RegLang Require Import languages.
@@ -7,7 +8,7 @@ From RegexpBrzozowski Require Import glue regexp finite_der equiv.
 
 Set Implicit Arguments. 
 Unset Strict Implicit. 
-Import Prenex Implicits. 
+Import Prenex Implicits.
 (* end hide *)
 
 (** This implementation of similarity is more effiencient than
@@ -321,9 +322,7 @@ move => r1 r2. apply: (iffP idP).
 - move => ->. by rewrite (compare_refl r2).
 Qed.
 
-Definition canonical_regexp_eq_mixin := EqMixin canonical_regexp_eq_axiom.
-
-Canonical Structure canonical_regexp_eqType := EqType canonical_regexp canonical_regexp_eq_mixin.
+HB.instance Definition _ := hasDecEq.Build canonical_regexp canonical_regexp_eq_axiom.
 
 Lemma compare_trans : forall r1 r2 r3 s, compare r1 r2 = s -> compare r2 r3 = s -> compare r1 r3 = s.
 Proof.
@@ -437,7 +436,7 @@ end.
 
 (* begin hide *)
 Lemma CConcP : forall l1 l2 u,
-  reflect (exists2 v1, v1 \in CConc l1 & exists2 v2, v2 \in CConc l2 & u = v1++v2)
+  reflect (exists2 v1 , v1 \in CConc l1 & exists2 v2, v2 \in CConc l2 & u = v1++v2)
      (u \in (CConc (l1++l2))).
 Proof.
 elim => [ | hd tl ih] l2 u /=;
@@ -454,7 +453,7 @@ elim => [ | hd tl ih] l2 u /=;
 - apply: (iffP (@concP char _ _ _)).
   * case => [v1 [v2 [hv [hv1 hv2]]]]. case: (ih l2 v2 hv2) => v2' hv2' [v3 hv3].
     exists (v1 ++ v2'). rewrite -topredE /= /mem_creg /=.
-    apply/concP; first by exists v1, v2'. 
+    apply/concP; first by exists v1 , v2'.
     by exists v3 => //; rewrite hv q catA.
   * case => [v1]. rewrite -topredE /= /mem_creg /=.
     move/concP => [w1 [w2 [hw [hw1 hw2]]]]. case => [v2 hv2 ->].
@@ -1176,7 +1175,7 @@ elim => [ | | | s | c1 hc1 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 
   * move/andP: h2 => [h2 h3]. by rewrite hc1 h1 hc2 h2.
 - rewrite mem_mkConc. rewrite -!topredE /= /mem_creg /=. apply/concP/concP.
   * case => v1; case => v2 [heq [hv2 hv1]].
-    exists v1, v2. split => //. split; first by rewrite -hc1.
+    exists v1 , v2. split => //. split; first by rewrite -hc1.
     apply/concP. exists v2, [::].
     split; first by rewrite cats0.
     by rewrite -hc2.
@@ -1184,7 +1183,7 @@ elim => [ | | | s | c1 hc1 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 hc1 c2 hc2 | c1 
     case/concP: hv2 => v2'; case => v3 [hv2'v3 [hv2' hv3]].
     case: v3 hv2'v3 hv3 => //.
     rewrite cats0 => hv2'v3 _.
-    exists v1, v2'.
+    exists v1 , v2'.
     rewrite -hv2'v3; split => //.
     split; first by rewrite hc1.
     by rewrite hc2 hv2'v3.
@@ -2510,27 +2509,26 @@ Canonical Structure bool_osym_module.
 
 
 Definition ssim2 :
-  regular_expression [eqType of bool] -> 
-  regular_expression [eqType of bool] -> bool 
+  regular_expression bool -> 
+  regular_expression bool -> bool 
 := @similar bool_osym_module.
 
 
-Lemma ssim2_Plus_id  : forall c : regular_expression [eqType of bool],
+Lemma ssim2_Plus_id  : forall c : regular_expression bool,
   ssim2 (Plus c c) c.
 Proof.
 rewrite /ssim2 /similar => c /=.
 rewrite mkPlus_id => //.
 by apply wf_re_can.
-
 Qed.
 
-Lemma ssim2_PlusC :forall c1 c2 : regular_expression [eqType of bool],
+Lemma ssim2_PlusC :forall c1 c2 : regular_expression bool,
         ssim2 (Plus c1 c2) (Plus c2 c1).
 Proof.
 by rewrite /ssim2 /similar => c d /=; rewrite mkPlusC. 
 Qed.
 
-Lemma ssim2_PlusA : forall c1 c2 c3 : regular_expression [eqType of bool],
+Lemma ssim2_PlusA : forall c1 c2 c3 : regular_expression bool,
         ssim2 (Plus (Plus c1 c2) c3) (Plus c1 (Plus c2 c3)).
 Proof.
 rewrite /ssim2 /similar => c d e /=. 

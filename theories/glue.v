@@ -1,5 +1,6 @@
 (* begin hide *)
 From Coq Require Import Mergesort Permutation.
+From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat seq fintype.
 From mathcomp Require Import path.
 
@@ -28,10 +29,7 @@ by case : a b => [] [].
 by move => ->; case :b .
 Qed.
 
-Definition comparison_eq_mixin :=
- EqMixin eq_comparison_axiom.
-Canonical Structure comparison_eqType :=
- EqType comparison comparison_eq_mixin.
+HB.instance Definition _ := hasDecEq.Build comparison eq_comparison_axiom.
 
 (** Definition of a canonical structure of an eqType with a 3 states
     total comparison function *)

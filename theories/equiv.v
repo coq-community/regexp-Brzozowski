@@ -16,8 +16,8 @@ Import Prenex Implicits.
     equality *)
 Section Equiv.
 
-Definition bregexp := regular_expression [eqType of bool].
-Definition bword := word [eqType of bool].
+Definition bregexp := regular_expression bool.
+Definition bword := word bool.
 
 
 (** The similarity is still abstracted *)
